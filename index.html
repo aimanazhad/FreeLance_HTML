@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+    <meta name="description" content="Modern login page design in English." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="auth-page">
+      <section class="auth-card">
+        <article class="brand-panel">
+          <div class="brand-identity" aria-label="Freelance Marketplace brand logo">
+            <div class="brand-mark">FM</div>
+            <div>
+              <p class="brand-name">Freelance Market</p>
+              <p class="brand-tag">Smart gigs • Trusted clients</p>
+            </div>
+          </div>
+
+          <p class="eyebrow">Freelance Marketplace</p>
+          <h1>Welcome back, freelancer</h1>
+          <p class="lead">Sign in to explore gigs, manage projects, and connect with clients in one place.</p>
+          <ul class="feature-list">
+            <li>Discover trusted freelance opportunities</li>
+            <li>Track your orders and proposals</li>
+            <li>Work from any device, anywhere</li>
+          </ul>
+          <div class="mini-badges">
+            <span>Top Talent</span>
+            <span>Secure Login</span>
+            <span>Quick Access</span>
+          </div>
+        </article>
+
+        <article class="form-panel">
+          <div class="form-header">
+            <p class="eyebrow">Login</p>
+            <h2>Sign in to your account</h2>
+            <p class="muted">Use your email and password to enter the Freelance Marketplace.</p>
+          </div>
+
+          <form class="login-form">
+            <label>
+              Email
+              <input type="email" placeholder="you@example.com" required />
+            </label>
+            <label>
+              Password
+              <input id="passwordInput" type="password" placeholder="Enter your password" required />
+            </label>
+
+            <div class="row-between">
+              <label class="checkbox-row">
+                <input type="checkbox" />
+                <span>Remember me</span>
+              </label>
+              <a href="#" class="link-text">Forgot password?</a>
+            </div>
+
+            <button class="btn btn-primary" type="submit">Sign In</button>
+
+            <div class="divider">or continue with</div>
+
+            <div class="social-grid">
+              <button class="social-btn" type="button">Google</button>
+              <button class="social-btn" type="button">GitHub</button>
+            </div>
+          </form>
+
+          <p class="signup-note">Don't have an account? <a class="link-text" href="#">Create one</a></p>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const form = document.querySelector('.login-form');
+      form?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        alert('Login form submitted. You can connect this to your backend later.');
+      });
+    </script>
+  </body>
+</html>
