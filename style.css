@@ -1,3 +1,6 @@
+/* ==========================================================================
+   1. Base Global Variables & Resets (Tema Dark Glassmorphism Asal)
+   ========================================================================== */
 :root {
   --bg: #040814;
   --panel: rgba(9, 15, 27, 0.88);
@@ -9,8 +12,17 @@
   --primary-2: #2dd4ff;
 }
 
-* { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; }
+* { 
+  box-sizing: border-box; 
+  margin: 0;
+  padding: 0;
+}
+
+html, body { 
+  margin: 0; 
+  min-height: 100%; 
+}
+
 body {
   font-family: 'Inter', Arial, sans-serif;
   color: var(--text);
@@ -19,26 +31,19 @@ body {
     linear-gradient(135deg, #020617 0%, #07111f 45%, #04070d 100%);
 }
 
-.mini-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 18px;
+a { 
+  text-decoration: none; 
+  color: inherit; 
 }
 
-.mini-badges span {
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05);
-  color: #dbeafe;
-  border-radius: 999px;
-  padding: 0.45rem 0.65rem;
-  font-size: 0.9rem;
+button, input { 
+  font: inherit; 
 }
 
-a { text-decoration: none; color: inherit; }
-button, input { font: inherit; }
-
-.auth-page {
+/* ==========================================================================
+   2. Layout Utama (Auth Page Container & Split Layout)
+   ========================================================================== */
+.auth-page, .signup-container {
   min-height: 100vh;
   display: grid;
   place-items: center;
@@ -57,25 +62,49 @@ button, input { font: inherit; }
 }
 
 .brand-panel,
+.banner-panel,
 .form-panel {
   padding: 32px;
 }
 
-.brand-panel {
+/* Kiri: Panel Info Grafik / Branding */
+.brand-panel, .banner-panel {
+  width: 100%;
   background:
     linear-gradient(160deg, rgba(124, 92, 255, 0.14), transparent 35%),
     linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(7, 11, 19, 0.98));
   border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.brand-identity {
+.illustration-placeholder {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  z-index: 1;
+}
+
+/* Kanan: Panel Form Input */
+.form-panel { 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+}
+
+/* ==========================================================================
+   3. Komponen Tipografi & Identiti Jenama (Brand Identity)
+   ========================================================================== */
+.brand-identity, .brand-header {
   display: flex;
   align-items: center;
   gap: 14px;
   margin-bottom: 18px;
+  justify-content: flex-start;
 }
 
-.brand-mark {
+.brand-mark, .brand-logo {
   width: 58px;
   height: 58px;
   border-radius: 16px;
@@ -87,16 +116,27 @@ button, input { font: inherit; }
   background: linear-gradient(135deg, #8bffea 0%, #7c5cff 60%, #2dd4ff 100%);
   box-shadow: 0 16px 30px rgba(124, 92, 255, 0.35);
   letter-spacing: 0.08em;
+  position: relative;
 }
 
-.brand-name {
+.logo-f { transform: skewX(-10deg); }
+.logo-arrow {
+  position: absolute;
+  font-size: 11px;
+  right: 6px;
+  bottom: 6px;
+  color: #22d3ee;
+}
+
+.brand-name, .brand-text {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
   color: #eff6ff;
 }
 
-.brand-tag {
+.title-main { font-size: 1.05rem; font-weight: 700; color: #eff6ff; }
+.title-sub, .brand-tag {
   margin: 2px 0 0;
   color: var(--muted);
   font-size: 0.92rem;
@@ -107,15 +147,26 @@ button, input { font: inherit; }
   letter-spacing: 0.24em;
   font-size: 0.76rem;
   color: var(--primary-2);
+  margin-bottom: 4px;
 }
 
 h1, h2 { margin: 0 0 10px; line-height: 1.08; }
-h1 { font-size: clamp(2.1rem, 5vw, 3rem); }
-h2 { font-size: 1.5rem; }
+h1 { font-size: clamp(2.1rem, 5vw, 3rem); color: var(--text); }
+h2 { font-size: 1.5rem; color: var(--text); }
 
-.lead, .muted {
+.lead, .muted, .form-title p {
   color: var(--muted);
   line-height: 1.65;
+  font-size: 1rem;
+}
+
+.form-title {
+  margin-bottom: 20px;
+}
+.form-title h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
 .feature-list {
@@ -125,32 +176,163 @@ h2 { font-size: 1.5rem; }
   line-height: 1.7;
 }
 
-.form-panel { display: flex; flex-direction: column; justify-content: center; }
+.mini-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
 
-.login-form {
+.mini-badges span {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: #dbeafe;
+  border-radius: 999px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.9rem;
+}
+
+/* ==========================================================================
+   4. Form Input & Password Layout Fields (Gaya Dark Glassmorphism)
+   ========================================================================== */
+form, .login-form {
   display: grid;
   gap: 14px;
   margin-top: 18px;
 }
 
-.login-form label {
+form label, .login-form label, .input-group label {
   display: grid;
   gap: 6px;
   color: #eaf2ff;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
+/* Input Styles */
 .login-form input[type="email"],
-.login-form input[type="password"] {
+.login-form input[type="password"],
+.input-group input[type="text"],
+.input-group input[type="email"] {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 0.85rem 0.95rem;
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
+  outline: none;
 }
 
-.login-form input::placeholder { color: #9fb5d6; }
+.login-form input::placeholder,
+.input-group input::placeholder { 
+  color: #9fb5d6; 
+}
+
+/* Susunan untuk field Password (Ikon mata & Lock) */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 0.85rem 4.5rem 0.85rem 2.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  outline: none;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.9rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  background: transparent;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #8be9ff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.toggle-password:hover {
+  color: #2dd4ff;
+}
+
+/* ==========================================================================
+   5. Action Buttons & Divider
+   ========================================================================== */
+.btn, .btn-submit {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.9rem 1rem;
+  border: 1px solid transparent;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: white;
+  box-shadow: 0 14px 30px rgba(124, 92, 255, 0.35);
+  transition: opacity 0.2s ease;
+}
+
+.btn:hover, .btn-submit:hover {
+  opacity: 0.9;
+}
+
+.btn-google, .social-btn {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+.btn-google:hover, .social-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.divider {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.92rem;
+  position: relative;
+  margin: 16px 0;
+  width: 100%;
+}
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 35%;
+  height: 1px;
+  background: var(--line);
+}
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+.divider span { background: transparent; position: relative; z-index: 2; }
 
 .row-between {
   display: flex;
@@ -170,72 +352,154 @@ h2 { font-size: 1.5rem; }
 
 .link-text { color: #8be9ff; }
 
-.btn {
-  display: inline-flex;
-  justify-content: center;
+.signup-note, .login-redirect {
+  margin-top: 20px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.signup-note a, .login-redirect a {
+  color: #8be9ff;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   6. Role Selector Popup Modal Structure (Gaya Kekal Terang Ikut Gambar)
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 4, 10, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
   align-items: center;
-  border-radius: 999px;
-  padding: 0.9rem 1rem;
-  border: 1px solid transparent;
-  font-weight: 700;
-  cursor: pointer;
+  justify-content: center;
+  padding: 24px;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
-  color: white;
-  box-shadow: 0 14px 30px rgba(124, 92, 255, 0.35);
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.divider {
-  text-align: center;
-  color: var(--muted);
-  font-size: 0.92rem;
+.modal-box {
+  background: #ffffff;
+  color: #0f172a;
+  width: 100%;
+  max-width: 350px;
+  padding: 28px;
+  border-radius: 20px;
   position: relative;
-  margin: 4px 0;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+  transform: scale(0.95);
+  transition: transform 0.2s ease;
 }
-.divider::before,
-.divider::after {
-  content: "";
+
+.modal-overlay.active .modal-box {
+  transform: scale(1);
+}
+
+.modal-close {
   position: absolute;
-  top: 50%;
-  width: 35%;
-  height: 1px;
-  background: var(--line);
-}
-.divider::before { left: 0; }
-.divider::after { right: 0; }
-
-.social-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.social-btn {
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
-  border-radius: 12px;
-  padding: 0.75rem;
+  top: 22px;
+  right: 22px;
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 1.1rem;
+  font-weight: 900;
   cursor: pointer;
 }
 
-.signup-note {
-  margin-top: 16px;
-  color: var(--muted);
-  text-align: center;
+.modal-box h2 {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.05em;
 }
 
+.role-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.role-option-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.role-option-card input[type="radio"] {
+  display: none;
+}
+
+.custom-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #cbd5e1;
+  display: inline-block;
+  position: relative;
+}
+
+.role-option-card input[type="radio"]:checked + .custom-radio {
+  background-color: #7c5cff;
+  box-shadow: inset 0 0 0 4px #ffffff;
+}
+
+.role-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-done {
+  background-color: #e2e8f0;
+  color: #1e293b;
+  border: none;
+  padding: 6px 22px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.btn-done:hover {
+  background-color: #cbd5e1;
+}
+
+/* ==========================================================================
+   7. Responsive Media Queries
+   ========================================================================== */
 @media (max-width: 920px) {
-  .auth-card { grid-template-columns: 1fr; }
-  .brand-panel { border-right: none; border-bottom: 1px solid var(--line); }
+  .auth-card { 
+    grid-template-columns: 1fr; 
+    max-width: 500px;
+  }
+  .brand-panel, .banner-panel { 
+    border-right: none; 
+    border-bottom: 1px solid var(--line); 
+    display: none; /* Sembunyikan panel gambar pada skrin kecil supaya lebih kemas */
+  }
 }
 
 @media (max-width: 560px) {
-  .auth-page { padding: 12px; }
-  .brand-panel, .form-panel { padding: 18px; }
+  .auth-page, .signup-container { padding: 12px; }
+  .brand-panel, .banner-panel, .form-panel { padding: 20px; }
   .row-between, .social-grid { grid-template-columns: 1fr; display: grid; }
-  .btn { width: 100%; }
   .mini-badges { gap: 8px; }
 }

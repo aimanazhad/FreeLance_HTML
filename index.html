@@ -27,7 +27,7 @@
 
           <p class="eyebrow">Freelance Marketplace</p>
           <h1>Welcome back, freelancer</h1>
-          <p class="lead">Sign in to explore gigs, manage projects, and connect with clients in one place.</p>
+          <p class="lead">Log in to explore gigs, manage projects, and connect with clients in one place.</p>
           <ul class="feature-list">
             <li>Discover trusted freelance opportunities</li>
             <li>Track your orders and proposals</li>
@@ -42,12 +42,13 @@
 
         <article class="form-panel">
           <div class="form-header">
+            <img src="logo.png" alt="Freelance Marketplace logo" class="login-logo" />
             <p class="eyebrow">Login</p>
-            <h2>Sign in to your account</h2>
+            <h2>Log in to your account</h2>
             <p class="muted">Use your email and password to enter the Freelance Marketplace.</p>
           </div>
 
-          <form class="login-form">
+          <form class="login-form" id="mainLoginForm">
             <label>
               Email
               <input type="email" placeholder="you@example.com" required />
@@ -65,7 +66,7 @@
               <a href="#" class="link-text">Forgot password?</a>
             </div>
 
-            <button class="btn btn-primary" type="submit">Sign In</button>
+            <button class="btn btn-primary" type="submit">Log In</button>
 
             <div class="divider">or continue with</div>
 
@@ -75,16 +76,73 @@
             </div>
           </form>
 
-          <p class="signup-note">Don't have an account? <a class="link-text" href="#">Create one</a></p>
+          <p class="signup-note">Don't have an account? <a class="link-text" href="signup.html">Create one</a></p>
+          
+          <p class="signup-note" style="margin-top: 12px; font-size: 0.85rem; opacity: 0.8;">
+            Are you an administrator? <a class="link-text" href="adminlogin.html" style="text-decoration: underline;">Access Admin Portal</a>
+          </p>
+          
         </article>
       </section>
     </main>
 
+    <div class="modal-overlay" id="roleModalOverlay">
+      <div class="modal-box">
+        <button class="modal-close" id="closeModalBtn" type="button">X</button>
+        <h2>SELECT YOUR ROLE</h2>
+        
+        <div class="role-options">
+          <label class="role-option-card">
+            <input type="radio" name="userRole" value="freelancer" checked />
+            <span class="custom-radio"></span>
+            <span class="role-label">Freelancer</span>
+          </label>
+          
+          <label class="role-option-card">
+            <input type="radio" name="userRole" value="client" />
+            <span class="custom-radio"></span>
+            <span class="role-label">Client</span>
+          </label>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn-done" id="doneModalBtn" type="button">DONE</button>
+        </div>
+      </div>
+    </div>
+
     <script>
-      const form = document.querySelector('.login-form');
-      form?.addEventListener('submit', (event) => {
-        event.preventDefault();
-        alert('Login form submitted. You can connect this to your backend later.');
+      const loginForm = document.getElementById('mainLoginForm');
+      const roleModalOverlay = document.getElementById('roleModalOverlay');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const doneModalBtn = document.getElementById('doneModalBtn');
+
+      // 1. Apabila form diserahkan (submit) dan sah, sekat pembukaan URL dan tunjuk modal
+      loginForm?.addEventListener('submit', (event) => {
+        event.preventDefault(); 
+        roleModalOverlay.classList.add('active'); // Aktifkan modal (style dari style.css gabungan)
+      });
+
+      // 2. Tutup modal melalui butang pangkah (X)
+      closeModalBtn?.addEventListener('click', () => {
+        roleModalOverlay.classList.remove('active');
+      });
+
+      // 3. Proses pilihan apabila butang DONE ditekan
+      doneModalBtn?.addEventListener('click', () => {
+        const selectedRole = document.querySelector('input[name="userRole"]:checked')?.value;
+        roleModalOverlay.classList.remove('active');
+        
+        alert(`Logged in successfully as a ${selectedRole}!`);
+        // Anda boleh gantikan kod alert di atas dengan sistem navigasi dashboard sebenar nanti, contohnya:
+        // window.location.href = selectedRole === 'freelancer' ? 'freelancer-dashboard.html' : 'client-dashboard.html';
+      });
+
+      // 4. Tutup modal secara alternatif sekiranya kawasan gelap luar kotak ditekan
+      roleModalOverlay?.addEventListener('click', (event) => {
+        if (event.target === roleModalOverlay) {
+          roleModalOverlay.classList.remove('active');
+        }
       });
     </script>
   </body>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Freelance Marketplace</title>
+  <link rel="stylesheet" href="admin-style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="admin-dashboard-body">
+
+  <div class="dashboard-container">
+    
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-chart-line logo-icon"></i>
+          <div>
+            <span class="brand-title">Freelance</span>
+            <span class="brand-subtitle">Marketplace</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="#" class="menu-item active"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="#" class="menu-item"><i class="fa-solid fa-users"></i> Manage Users</a>
+        <a href="#" class="menu-item"><i class="fa-solid fa-briefcase"></i> Manage Jobs</a>
+        <a href="#" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+        <a href="#" class="menu-item"><i class="fa-solid fa-comment-dots"></i> Messages</a>
+        <a href="#" class="menu-item"><i class="fa-solid fa-gear"></i> Settings</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      
+      <header class="content-header">
+        <div class="welcome-text">
+          <h1>Welcome back, Admin!</h1>
+          <p>Here's what's happening on your platform today.</p>
+        </div>
+        <div class="header-controls">
+          <button class="notification-btn"><i class="fa-regular fa-bell"></i></button>
+          <div class="admin-profile">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="Admin Avatar" class="profile-avatar">
+            <span class="profile-name">Admin</span>
+            <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+          </div>
+        </div>
+      </header>
+
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-label">Total Users</span>
+            <h2 class="stat-number">120</h2>
+            <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> 12% <span class="trend-period">from last month</span></span>
+          </div>
+          <div class="stat-icon-wrapper ico-users">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <i class="fa-solid fa-arrow-right card-arrow"></i>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-label">Total Freelancers</span>
+            <h2 class="stat-number">80</h2>
+            <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> 15% <span class="trend-period">from last month</span></span>
+          </div>
+          <div class="stat-icon-wrapper ico-freelancers">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
+          <i class="fa-solid fa-arrow-right card-arrow"></i>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-label">Total Clients</span>
+            <h2 class="stat-number">40</h2>
+            <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> 8% <span class="trend-period">from last month</span></span>
+          </div>
+          <div class="stat-icon-wrapper ico-clients">
+            <i class="fa-solid fa-handshake"></i>
+          </div>
+          <i class="fa-solid fa-arrow-right card-arrow"></i>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <span class="stat-label">Total Jobs Posted</span>
+            <h2 class="stat-number">120</h2>
+            <span class="stat-trend trend-up"><i class="fa-solid fa-arrow-up"></i> 10% <span class="trend-period">from last month</span></span>
+          </div>
+          <div class="stat-icon-wrapper ico-jobs">
+            <i class="fa-solid fa-file-invoice"></i>
+          </div>
+          <i class="fa-solid fa-arrow-right card-arrow"></i>
+        </div>
+      </section>
+
+      <div class="workspace-split">
+        
+        <section class="workspace-card activities-card">
+          <div class="card-header">
+            <h3>Recent Activities</h3>
+            <a href="#" class="view-all-link">View All</a>
+          </div>
+          <div class="activity-timeline">
+            <div class="activity-item">
+              <div class="activity-icon icon-job"><i class="fa-solid fa-pen-nib"></i></div>
+              <div class="activity-details">
+                <p class="activity-title"><strong>Ali123</strong> posted a new job</p>
+                <span class="activity-subtitle">"Logo Design for Cafe Brand"</span>
+              </div>
+              <span class="activity-time">10 mins ago</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon icon-reg"><i class="fa-solid fa-user-plus"></i></div>
+              <div class="activity-details">
+                <p class="activity-title"><strong>Siti245</strong> registered as a freelancer</p>
+              </div>
+              <span class="activity-time">1 hour ago</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon icon-report"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="activity-details">
+                <p class="activity-title"><strong>Nurul Syah</strong> reported a job post</p>
+                <span class="activity-subtitle">"Content Writing for Blog"</span>
+              </div>
+              <span class="activity-time">2 hours ago</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon icon-user"><i class="fa-solid fa-user-pen"></i></div>
+              <div class="activity-details">
+                <p class="activity-title"><strong>Hafiz Hazim</strong> updated their profile</p>
+              </div>
+              <span class="activity-time">4 hours ago</span>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon icon-complete"><i class="fa-solid fa-square-check"></i></div>
+              <div class="activity-details">
+                <p class="activity-title"><strong>Iman Zaki</strong> completed a project</p>
+                <span class="activity-subtitle">"Website Development"</span>
+              </div>
+              <span class="activity-time">5 hours ago</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="workspace-card management-card">
+          <div class="card-header">
+            <h3>User Management</h3>
+            <div class="header-actions">
+              <div class="search-box">
+                <input type="text" placeholder="Search for users...">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </div>
+              <a href="#" class="view-all-link">View All</a>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="user-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="user-meta">
+                      <span class="table-username">Ali123</span>
+                      <span class="table-email">aliAhmad123_@gmail.com</span>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-freelancer">Freelancer</span></td>
+                  <td><span class="status-indicator status-active">Active</span></td>
+                  <td>2 May 2025</td>
+                  <td><button class="action-menu-btn"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="user-meta">
+                      <span class="table-username">Siti Nadirah</span>
+                      <span class="table-email">sitinad88@gmail.com</span>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-client">Client</span></td>
+                  <td><span class="status-indicator status-active">Active</span></td>
+                  <td>18 May 2025</td>
+                  <td><button class="action-menu-btn"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="user-meta">
+                      <span class="table-username">Muhammad Afiq</span>
+                      <span class="table-email">affiqMohd22@gmail.com</span>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-freelancer">Freelancer</span></td>
+                  <td><span class="status-indicator status-active">Active</span></td>
+                  <td>18 May 2025</td>
+                  <td><button class="action-menu-btn"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="user-meta">
+                      <span class="table-username">Aisyah Amirah</span>
+                      <span class="table-email">meerahSyah00@gmail.com</span>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-freelancer">Freelancer</span></td>
+                  <td><span class="status-indicator status-suspended">Suspended</span></td>
+                  <td>23 May 2025</td>
+                  <td><button class="action-menu-btn"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="user-meta">
+                      <span class="table-username">Jamid09</span>
+                      <span class="table-email">naufalJamid_27@gmail.com</span>
+                    </div>
+                  </td>
+                  <td><span class="badge badge-client">Client</span></td>
+                  <td><span class="status-indicator status-active">Active</span></td>
+                  <td>26 May 2025</td>
+                  <td><button class="action-menu-btn"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <section class="workspace-card chart-card-section">
+        <div class="card-header">
+          <h3>Job Overview</h3>
+        </div>
+        <div class="chart-summary-grid">
+          <div class="chart-progress-bar bar-open">
+            <div class="bar-info">
+              <div class="bar-label-group">
+                <div class="bar-icon-box box-open"><i class="fa-solid fa-folder-open"></i></div>
+                <div>
+                  <span class="bar-title">Open Jobs</span>
+                  <h4 class="bar-value">32</h4>
+                </div>
+              </div>
+              <span class="bar-percentage">49%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-open" style="width: 49%"></div></div>
+          </div>
+          
+          <div class="chart-progress-bar bar-progress">
+            <div class="bar-info">
+              <div class="bar-label-group">
+                <div class="bar-icon-box box-progress"><i class="fa-solid fa-clock"></i></div>
+                <div>
+                  <span class="bar-title">In Progress</span>
+                  <h4 class="bar-value">18</h4>
+                </div>
+              </div>
+              <span class="bar-percentage">28%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-progress" style="width: 28%"></div></div>
+          </div>
+
+          <div class="chart-progress-bar bar-completed">
+            <div class="bar-info">
+              <div class="bar-label-group">
+                <div class="bar-icon-box box-completed"><i class="fa-solid fa-circle-check"></i></div>
+                <div>
+                  <span class="bar-title">Completed</span>
+                  <h4 class="bar-value">12</h4>
+                </div>
+              </div>
+              <span class="bar-percentage">18%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill fill-completed" style="width: 18%"></div></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>
