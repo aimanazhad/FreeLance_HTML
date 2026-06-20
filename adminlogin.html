@@ -41,7 +41,7 @@
           <p class="muted">Please provide your authorized official staff ID/email address and system passphrase.</p>
         </div>
 
-        <form class="login-form" action="#" method="POST">
+        <form class="login-form" id="adminLoginForm" action="#" method="POST">
           
           <div class="input-group">
             <label for="admin-email">Official Admin Email / Staff ID</label>
@@ -82,6 +82,7 @@
   </div>
 
   <script>
+    // Fungsi sedia ada untuk sembunyi/papar kata laluan
     function toggleAdminPass() {
       const passInput = document.getElementById("admin-password");
       const toggleBtn = document.querySelector(".toggle-password");
@@ -94,6 +95,21 @@
         toggleBtn.innerHTML = '<i class="fa-regular fa-eye-slash"></i> Show';
       }
     }
+
+    // BARU: Logik untuk pengesahan borang dan navigasi automatik
+    document.getElementById("adminLoginForm").addEventListener("submit", function(event) {
+      // Menghalang borang daripada refresh halaman secara default
+      event.preventDefault(); 
+      
+      const email = document.getElementById("admin-email").value;
+      const password = document.getElementById("admin-password").value;
+
+      // Memastikan input emel dan kata laluan tidak kosong (Validasi HTML5 'required' turut membantu)
+      if (email && password) {
+        // Navigasi terus ke fail halaman Admin Dashboard anda
+        window.location.href = "dashboard_admin.html"; 
+      }
+    });
   </script>
 
 </body>
