@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Jobs - Client Dashboard</title>
+  <link rel="stylesheet" href="client-style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .myjobs-grid { display: grid; grid-template-columns: 1.35fr 0.65fr; gap: 24px; }
+    .myjobs-panel { background-color: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06); }
+    .project-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+    .project-header h2 { font-size: 22px; margin: 0; }
+    .btn-primary { background: #7c3aed; color: #fff; border: none; border-radius: 999px; padding: 12px 24px; cursor: pointer; font-weight: 700; }
+    .job-card { background: #f8f4ff; border-radius: 18px; padding: 18px 22px; margin-bottom: 18px; border: 1px solid #ede9fe; }
+    .job-card:last-child { margin-bottom: 0; }
+    .job-top { display: flex; gap: 16px; align-items: flex-start; }
+    .job-icon { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .icon-yellow { background: #fef9c3; color: #a16207; }
+    .icon-blue { background: #dbeafe; color: #1d4ed8; }
+    .icon-green { background: #d1fae5; color: #047857; }
+    .icon-pink { background: #fee2e2; color: #be123c; }
+    .job-details { flex: 1; }
+    .job-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .job-sub { font-size: 13px; color: #6b7280; margin-bottom: 10px; display: block; }
+    .job-rate { font-size: 16px; font-weight: 800; color: #111827; margin-bottom: 10px; }
+    .job-meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .pill { display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 999px; background: #eef2ff; color: #4338ca; font-size: 12px; font-weight: 700; }
+    .job-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .btn-secondary { background: #eef2ff; color: #4338ca; border: none; border-radius: 999px; padding: 10px 20px; cursor: pointer; font-weight: 700; }
+    .status-card { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06); min-height: 260px; }
+    .status-card h3 { margin-top: 0; font-size: 18px; }
+    .status-empty { min-height: 220px; display: grid; place-items: center; color: #6b7280; font-weight: 600; }
+  </style>
+</head>
+<body class="client-dashboard-body">
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <img src="https://i.postimg.co/N0Mszp57/F-Logo.png" alt="Logo" class="logo-img" onerror="this.style.display='none';">
+          <div class="brand-text-group">
+            <span class="brand-title">Freelance</span>
+            <span class="brand-subtitle">Marketplace</span>
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-menu">
+        <a href="dashboard_client.html" class="menu-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="jobs_client.html" class="menu-item"><i class="fa-solid fa-circle-plus"></i> Post a Job</a>
+        <a href="myjob_client.html" class="menu-item active"><i class="fa-solid fa-file-lines"></i> My Jobs</a>
+        <a href="dashboard_client.html" class="menu-item"><i class="fa-solid fa-comment-dots"></i> Messages</a>
+        <a href="dashboard_client.html" class="menu-item"><i class="fa-solid fa-credit-card"></i> Payment</a>
+        <a href="dashboard_client.html" class="menu-item"><i class="fa-solid fa-star"></i> Saved Freelancers</a>
+        <a href="dashboard_client.html" class="menu-item"><i class="fa-solid fa-star-half-stroke"></i> Review</a>
+        <a href="profile_client.html" class="menu-item"><i class="fa-solid fa-user"></i> Profile</a>
+        <a href="dashboard_client.html" class="menu-item"><i class="fa-solid fa-gear"></i> Settings</a>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header class="content-header">
+        <div class="header-controls-left"></div>
+        <div class="header-controls-right">
+          <button class="notification-btn"><i class="fa-regular fa-bell"></i></button>
+          <div class="profile-dropdown-trigger">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Taylor" alt="User Avatar" class="profile-avatar">
+            <div class="user-info-text">
+              <span class="profile-name">Taylor Sweety</span>
+              <span class="profile-role">Client</span>
+            </div>
+            <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+          </div>
+        </div>
+      </header>
+      <section class="welcome-text-section">
+        <span class="welcome-tag">Welcome back,</span>
+        <h1 class="welcome-heading">Taylor Sweety! 👋</h1>
+      </section>
+      <section class="myjobs-grid">
+        <div class="myjobs-panel">
+          <div class="project-header">
+            <div>
+              <p class="eyebrow" style="font-size:13px;color:#6b7280;margin-bottom:4px;">My Projects</p>
+              <h2 style="margin:0;">My Posted Job</h2>
+            </div>
+            <a href="jobs_client.html" class="btn-primary">Post a new Job</a>
+          </div>
+          <div class="job-card">
+            <div class="job-top">
+              <div class="job-icon icon-yellow"><i class="fa-solid fa-pen-nib"></i></div>
+              <div class="job-details">
+                <span class="job-title">Logo Design for Cafe Brand</span>
+                <span class="job-sub">Design & Creative</span>
+                <span class="job-rate">RM 150 - RM 300</span>
+                <div class="job-meta">
+                  <span class="pill">Remote</span>
+                  <span style="font-size:13px;color:#6b7280;">2 Days Left</span>
+                </div>
+              </div>
+            </div>
+            <div class="job-actions">
+              <button class="btn-secondary">12 Proposals</button>
+              <button class="btn-secondary">Edit</button>
+              <button class="btn-secondary">Archive</button>
+            </div>
+          </div>
+          <div class="job-card">
+            <div class="job-top">
+              <div class="job-icon icon-blue"><i class="fa-solid fa-code"></i></div>
+              <div class="job-details">
+                <span class="job-title">Build a Responsive Landing Page</span>
+                <span class="job-sub">Development & IT</span>
+                <span class="job-rate">RM 400 - RM 800</span>
+                <div class="job-meta">
+                  <span class="pill">Remote</span>
+                  <span style="font-size:13px;color:#6b7280;">7 Days Left</span>
+                </div>
+              </div>
+            </div>
+            <div class="job-actions">
+              <button class="btn-secondary">8 Proposals</button>
+              <button class="btn-secondary">Edit</button>
+              <button class="btn-secondary">Archive</button>
+            </div>
+          </div>
+          <div class="job-card">
+            <div class="job-top">
+              <div class="job-icon icon-green"><i class="fa-solid fa-font"></i></div>
+              <div class="job-details">
+                <span class="job-title">Content Writing for Blog</span>
+                <span class="job-sub">Writing & Translation</span>
+                <span class="job-rate">RM 200 - RM 400</span>
+                <div class="job-meta">
+                  <span class="pill">Remote</span>
+                  <span style="font-size:13px;color:#6b7280;">4 Days Ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="job-actions">
+              <button class="btn-secondary">17 Proposals</button>
+              <button class="btn-secondary">Edit</button>
+              <button class="btn-secondary">Archive</button>
+            </div>
+          </div>
+          <div class="job-card">
+            <div class="job-top">
+              <div class="job-icon icon-pink"><i class="fa-solid fa-video"></i></div>
+              <div class="job-details">
+                <span class="job-title">Promotional Video Editing</span>
+                <span class="job-sub">Photography & Video</span>
+                <span class="job-rate">RM 150 - RM 300</span>
+                <div class="job-meta">
+                  <span class="pill">Remote</span>
+                  <span style="font-size:13px;color:#6b7280;">30 Days Left</span>
+                </div>
+              </div>
+            </div>
+            <div class="job-actions">
+              <button class="btn-secondary">8 Proposals</button>
+              <button class="btn-secondary">Edit</button>
+              <button class="btn-secondary">Archive</button>
+            </div>
+          </div>
+        </div>
+        <aside class="status-card">
+          <h3>Ongoing Projects</h3>
+          <div class="status-empty">No ongoing projects yet</div>
+        </aside>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

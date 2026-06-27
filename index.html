@@ -132,10 +132,14 @@
       doneModalBtn?.addEventListener('click', () => {
         const selectedRole = document.querySelector('input[name="userRole"]:checked')?.value;
         roleModalOverlay.classList.remove('active');
-        
-        alert(`Logged in successfully as a ${selectedRole}!`);
-        // Anda boleh gantikan kod alert di atas dengan sistem navigasi dashboard sebenar nanti, contohnya:
-        // window.location.href = selectedRole === 'freelancer' ? 'freelancer-dashboard.html' : 'client-dashboard.html';
+
+        if (selectedRole === 'freelancer') {
+          window.location.href = 'dashboard_freelancer.html';
+        } else if (selectedRole === 'client') {
+          window.location.href = 'dashboard_client.html';
+        } else {
+          window.location.href = 'dashboard_client.html';
+        }
       });
 
       // 4. Tutup modal secara alternatif sekiranya kawasan gelap luar kotak ditekan
