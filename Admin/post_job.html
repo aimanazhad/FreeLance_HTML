@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post New Job - Admin Dashboard</title>
+  <link rel="stylesheet" href="admin-style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    .page-header p {
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .header-actions-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary:hover {
+      background: #4f46e5;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-outline:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .btn-success {
+      background: #22c55e;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-warning:hover {
+      background: #d97706;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Form Container */
+    .form-container {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 32px;
+    }
+
+    .form-container .form-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .form-group label .required {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #1f2937;
+      background: white;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: #9ca3af;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-group .helper-text {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    /* File Upload */
+    .file-upload-area {
+      border: 2px dashed #e5e7eb;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      background: #fafafa;
+    }
+
+    .file-upload-area:hover {
+      border-color: #6366f1;
+      background: #f5f3ff;
+    }
+
+    .file-upload-area i {
+      font-size: 36px;
+      color: #6366f1;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .file-upload-area p {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .file-upload-area .file-types {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    /* Skills Tags */
+    .skills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 0;
+    }
+
+    .skill-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eef2ff;
+      color: #4338ca;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .skill-tag .remove-skill {
+      cursor: pointer;
+      font-size: 12px;
+      color: #6366f1;
+      background: none;
+      border: none;
+    }
+
+    .skill-tag .remove-skill:hover {
+      color: #ef4444;
+    }
+
+    .skill-input-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .skill-input-wrapper input {
+      flex: 1;
+    }
+
+    .skill-input-wrapper button {
+      padding: 10px 16px;
+      background: #6366f1;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .skill-input-wrapper button:hover {
+      background: #4f46e5;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #d1d5db;
+      border-radius: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: #6366f1;
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+    }
+
+    /* Form Actions */
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .header-actions-right {
+        flex-wrap: wrap;
+        width: 100%;
+      }
+
+      .header-actions-right .btn-primary,
+      .header-actions-right .btn-outline,
+      .header-actions-right .btn-success,
+      .header-actions-right .btn-warning {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full-width {
+        grid-column: 1;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .form-actions .btn-primary,
+      .form-actions .btn-outline,
+      .form-actions .btn-success,
+      .form-actions .btn-warning {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .form-container {
+        padding: 20px;
+      }
+
+      .skill-input-wrapper {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .form-container {
+        padding: 16px;
+      }
+
+      .toggle-label {
+        font-size: 13px;
+      }
+
+      .file-upload-area {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body class="admin-dashboard-body">
+
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-chart-line logo-icon"></i>
+          <div>
+            <span class="brand-title">Freelance</span>
+            <span class="brand-subtitle">Marketplace</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="dashboard_admin.html" class="menu-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="manage_users.html" class="menu-item"><i class="fa-solid fa-users"></i> Manage Users</a>
+        <a href="manage_jobs.html" class="menu-item active"><i class="fa-solid fa-briefcase"></i> Manage Jobs</a>
+        <a href="reports.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+        <a href="messages.html" class="menu-item"><i class="fa-solid fa-comment-dots"></i> Messages</a>
+        <a href="settings.html" class="menu-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="profile.html" class="menu-item"><i class="fa-solid fa-user"></i> Profile</a>
+        <a href="../index.html" class="menu-item" style="margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 16px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div>
+          <h1>Post New Job</h1>
+          <p>Create a new job listing for freelancers on the platform</p>
+        </div>
+        <div class="header-actions-right">
+          <a href="manage_jobs.html" class="btn-outline">
+            <i class="fa-solid fa-arrow-left"></i> Cancel
+          </a>
+          <button type="submit" form="postJobForm" class="btn-success">
+            <i class="fa-regular fa-floppy-disk"></i> Publish Job
+          </button>
+        </div>
+      </div>
+
+      <!-- FORM -->
+      <div class="form-container">
+        <h2 class="form-title"><i class="fa-solid fa-briefcase" style="color:#6366f1;margin-right:10px;"></i> Job Details</h2>
+
+        <form id="postJobForm">
+          <div class="form-grid">
+            <!-- Job Title -->
+            <div class="form-group full-width">
+              <label for="jobTitle">Job Title <span class="required">*</span></label>
+              <input type="text" id="jobTitle" placeholder="e.g. Logo Design for Cafe Brand" required>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label for="category">Category <span class="required">*</span></label>
+              <select id="category" required>
+                <option value="">Select category...</option>
+                <option value="graphic">Graphic Design</option>
+                <option value="web">Web Development</option>
+                <option value="writing">Writing & Translation</option>
+                <option value="marketing">Marketing</option>
+                <option value="programming">Programming</option>
+                <option value="video">Photography & Video</option>
+                <option value="tutoring">Tutoring & Education</option>
+              </select>
+            </div>
+
+            <!-- Project Type -->
+            <div class="form-group">
+              <label for="projectType">Project Type <span class="required">*</span></label>
+              <select id="projectType" required>
+                <option value="">Select type...</option>
+                <option value="one-time">One-time Project</option>
+                <option value="ongoing">Ongoing Project</option>
+                <option value="hourly">Hourly Rate</option>
+              </select>
+            </div>
+
+            <!-- Budget Type -->
+            <div class="form-group">
+              <label for="budgetType">Budget Type <span class="required">*</span></label>
+              <select id="budgetType" required>
+                <option value="">Select budget type...</option>
+                <option value="fixed">Fixed Price</option>
+                <option value="hourly">Hourly Rate</option>
+              </select>
+            </div>
+
+            <!-- Min Budget -->
+            <div class="form-group">
+              <label for="minBudget">Minimum Budget <span class="required">*</span></label>
+              <input type="number" id="minBudget" placeholder="Min RM" required>
+            </div>
+
+            <!-- Max Budget -->
+            <div class="form-group">
+              <label for="maxBudget">Maximum Budget <span class="required">*</span></label>
+              <input type="number" id="maxBudget" placeholder="Max RM" required>
+            </div>
+
+            <!-- Job Description -->
+            <div class="form-group full-width">
+              <label for="jobDescription">Job Description <span class="required">*</span></label>
+              <textarea id="jobDescription" placeholder="Describe the job in detail. Include requirements, goals, and any specific instructions..." required></textarea>
+            </div>
+
+            <!-- Skills Required -->
+            <div class="form-group full-width">
+              <label>Skills Required <span class="required">*</span></label>
+              <div class="skill-input-wrapper">
+                <input type="text" id="skillInput" placeholder="Type a skill and press Add">
+                <button type="button" id="addSkillBtn">Add Skill</button>
+              </div>
+              <div class="skills-container" id="skillsContainer">
+                <span class="skill-tag">
+                  Logo Design
+                  <button type="button" class="remove-skill">&times;</button>
+                </span>
+                <span class="skill-tag">
+                  Branding
+                  <button type="button" class="remove-skill">&times;</button>
+                </span>
+                <span class="skill-tag">
+                  User Experience
+                  <button type="button" class="remove-skill">&times;</button>
+                </span>
+              </div>
+              <span class="helper-text">Press "Add Skill" to add more skills</span>
+            </div>
+
+            <!-- Client -->
+            <div class="form-group">
+              <label for="client">Client <span class="required">*</span></label>
+              <select id="client" required>
+                <option value="">Select client...</option>
+                <option value="Ali123">Ali123</option>
+                <option value="Siti Nadirah">Siti Nadirah</option>
+                <option value="Muhammad Afiq">Muhammad Afiq</option>
+                <option value="Aisyah Amirah">Aisyah Amirah</option>
+                <option value="Jamid09">Jamid09</option>
+              </select>
+            </div>
+
+            <!-- Location Type -->
+            <div class="form-group">
+              <label for="locationType">Location Type <span class="required">*</span></label>
+              <select id="locationType" required>
+                <option value="">Select location...</option>
+                <option value="remote">Remote</option>
+                <option value="onsite">On-site</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+            </div>
+
+            <!-- Deadline -->
+            <div class="form-group">
+              <label for="deadline">Application Deadline <span class="required">*</span></label>
+              <input type="date" id="deadline" required>
+            </div>
+
+            <!-- Status -->
+            <div class="form-group">
+              <label for="status">Job Status <span class="required">*</span></label>
+              <select id="status" required>
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+
+            <!-- Attachments -->
+            <div class="form-group full-width">
+              <label>Attachments</label>
+              <div class="file-upload-area" id="fileUploadArea">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <p><strong>Click to upload</strong> or drag and drop</p>
+                <p class="file-types">PNG, JPG, PDF, DOC - Max 5MB</p>
+                <input type="file" id="fileInput" multiple style="display:none;">
+              </div>
+              <span class="helper-text">Upload any relevant files (brief, reference images, etc.)</span>
+            </div>
+
+            <!-- Preferences -->
+            <div class="form-group full-width" style="margin-top:8px;">
+              <label style="margin-bottom:8px;">Job Preferences</label>
+              <div style="display:flex;gap:24px;flex-wrap:wrap;">
+                <label class="toggle-label">
+                  <span>Remote Allowed</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+                <label class="toggle-label">
+                  <span>Featured Job</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+                <label class="toggle-label">
+                  <span>Urgent Hiring</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+                <label class="toggle-label">
+                  <span>Send Notifications</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <a href="manage_jobs.html" class="btn-outline" style="justify-content:center;">
+              <i class="fa-solid fa-times"></i> Cancel
+            </a>
+            <button type="reset" class="btn-outline" style="justify-content:center;">
+              <i class="fa-solid fa-rotate-left"></i> Reset
+            </button>
+            <button type="button" class="btn-warning" style="justify-content:center;" onclick="saveDraft()">
+              <i class="fa-regular fa-file-lines"></i> Save as Draft
+            </button>
+            <button type="submit" class="btn-success" style="justify-content:center;">
+              <i class="fa-regular fa-floppy-disk"></i> Publish Job
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // ===== SKILLS MANAGEMENT =====
+    const skillsContainer = document.getElementById('skillsContainer');
+    const skillInput = document.getElementById('skillInput');
+    const addSkillBtn = document.getElementById('addSkillBtn');
+
+    // Add skill
+    addSkillBtn.addEventListener('click', function() {
+      const skill = skillInput.value.trim();
+      if (skill === '') {
+        alert('Please enter a skill name.');
+        return;
+      }
+      
+      // Check duplicate
+      const existingSkills = skillsContainer.querySelectorAll('.skill-tag');
+      for (let tag of existingSkills) {
+        if (tag.textContent.trim().replace('×', '').trim() === skill) {
+          alert('Skill already exists!');
+          return;
+        }
+      }
+
+      const skillTag = document.createElement('span');
+      skillTag.className = 'skill-tag';
+      skillTag.innerHTML = `
+        ${skill}
+        <button type="button" class="remove-skill">&times;</button>
+      `;
+      skillsContainer.appendChild(skillTag);
+      skillInput.value = '';
+      skillInput.focus();
+
+      // Add remove event
+      skillTag.querySelector('.remove-skill').addEventListener('click', function() {
+        skillTag.remove();
+      });
+    });
+
+    // Enter key for skill input
+    skillInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addSkillBtn.click();
+      }
+    });
+
+    // Remove skill (existing tags)
+    document.querySelectorAll('.skill-tag .remove-skill').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.skill-tag').remove();
+      });
+    });
+
+    // ===== FILE UPLOAD =====
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileInput = document.getElementById('fileInput');
+
+    fileUploadArea.addEventListener('click', function() {
+      fileInput.click();
+    });
+
+    fileUploadArea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '#6366f1';
+      this.style.background = '#f5f3ff';
+    });
+
+    fileUploadArea.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '#e5e7eb';
+      this.style.background = '#fafafa';
+    });
+
+    fileUploadArea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '#e5e7eb';
+      this.style.background = '#fafafa';
+      
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        const fileNames = Array.from(e.dataTransfer.files).map(f => f.name).join(', ');
+        this.querySelector('p').innerHTML = `<strong>${e.dataTransfer.files.length} file(s) selected</strong><br><span style="font-size:12px;color:#6b7280;">${fileNames}</span>`;
+      }
+    });
+
+    fileInput.addEventListener('change', function() {
+      if (this.files.length) {
+        const fileNames = Array.from(this.files).map(f => f.name).join(', ');
+        fileUploadArea.querySelector('p').innerHTML = `<strong>${this.files.length} file(s) selected</strong><br><span style="font-size:12px;color:#6b7280;">${fileNames}</span>`;
+      }
+    });
+
+    // ===== FORM SUBMISSION =====
+    document.getElementById('postJobForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get form values
+      const jobTitle = document.getElementById('jobTitle').value;
+      const category = document.getElementById('category').value;
+      const projectType = document.getElementById('projectType').value;
+      const budgetType = document.getElementById('budgetType').value;
+      const minBudget = document.getElementById('minBudget').value;
+      const maxBudget = document.getElementById('maxBudget').value;
+      const jobDescription = document.getElementById('jobDescription').value;
+      const client = document.getElementById('client').value;
+      const locationType = document.getElementById('locationType').value;
+      const deadline = document.getElementById('deadline').value;
+      const status = document.getElementById('status').value;
+
+      // Get skills
+      const skillTags = skillsContainer.querySelectorAll('.skill-tag');
+      const skills = Array.from(skillTags).map(tag => tag.textContent.trim().replace('×', '').trim());
+
+      // Validation
+      if (!jobTitle || !category || !projectType || !budgetType || !minBudget || !maxBudget || !jobDescription || !client || !locationType || !deadline || !status) {
+        alert('⚠️ Please fill in all required fields.');
+        return;
+      }
+
+      if (parseFloat(minBudget) >= parseFloat(maxBudget)) {
+        alert('⚠️ Minimum budget must be less than maximum budget.');
+        return;
+      }
+
+      if (skills.length === 0) {
+        alert('⚠️ Please add at least one skill.');
+        return;
+      }
+
+      // Success
+      alert('✅ Job posted successfully!\n\n' +
+        'Job Title: ' + jobTitle + '\n' +
+        'Category: ' + category + '\n' +
+        'Budget: RM ' + minBudget + ' - RM ' + maxBudget + '\n' +
+        'Client: ' + client + '\n' +
+        'Skills: ' + skills.join(', ') + '\n' +
+        'Status: ' + status
+      );
+
+      // Redirect back to manage jobs
+      window.location.href = 'manage_jobs.html';
+    });
+
+    // ===== SAVE DRAFT =====
+    function saveDraft() {
+      const jobTitle = document.getElementById('jobTitle').value || 'Untitled Job';
+      
+      if (confirm('💾 Save "' + jobTitle + '" as a draft?')) {
+        alert('✅ Job saved as draft!\n\n' +
+          'You can find it in your drafts folder.\n' +
+          'Job Title: ' + jobTitle
+        );
+        window.location.href = 'manage_jobs.html';
+      }
+    }
+
+    // ===== RESET CONFIRMATION =====
+    document.querySelector('button[type="reset"]').addEventListener('click', function(e) {
+      if (!confirm('Are you sure you want to reset all fields?')) {
+        e.preventDefault();
+      }
+    });
+  </script>
+
+</body>
+</html>

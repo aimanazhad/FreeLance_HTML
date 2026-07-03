@@ -41,7 +41,7 @@
                 <p>Connect with a world of opportunity for UiTM student</p>
             </header>
 
-            <form id="profileForm" onsubmit="event.preventDefault(); openRoleModal();">
+            <form id="profileForm">
                 <div class="input-group">
                     <label for="fullName">Full Name</label>
                     <input type="text" id="fullName" placeholder="Your full name" required>
@@ -105,13 +105,13 @@
             
             <div class="role-options">
                 <label class="role-option-card">
-                    <input type="radio" name="userRole" value="Freelancer">
+                    <input type="radio" name="userRole" value="freelancer">
                     <span class="custom-radio"></span>
                     <span class="role-label">Freelancer</span>
                 </label>
 
                 <label class="role-option-card">
-                    <input type="radio" name="userRole" value="Client">
+                    <input type="radio" name="userRole" value="client">
                     <span class="custom-radio"></span>
                     <span class="role-label">Client</span>
                 </label>
@@ -124,6 +124,25 @@
     </div>
 
     <script>
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters long!');
+                return;
+            }
+            
+            openRoleModal();
+        });
+
         function openRoleModal() {
             document.getElementById('roleModal').classList.add('active');
         }
@@ -135,12 +154,35 @@
         function submitRoleSelection() {
             const selected = document.querySelector('input[name="userRole"]:checked');
             if (selected) {
-                alert(`Account registration submitted as a ${selected.value}!`);
                 closeRoleModal();
+                // Redirect based on role selection
+                if (selected.value === 'freelancer') {
+                    window.location.href = 'dashboard_freelancer.html';
+                } else if (selected.value === 'client') {
+                    window.location.href = 'dashboard_client.html';
+                }
             } else {
-                alert('Please pick a role option.');
+                alert('Please select a role.');
             }
         }
+
+        // Toggle password visibility for all password fields
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.closest('.password-wrapper').querySelector('input');
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.className = 'fa-regular fa-eye';
+                    this.innerHTML = '<i class="fa-regular fa-eye"></i> Hide';
+                } else {
+                    input.type = 'password';
+                    icon.className = 'fa-regular fa-eye-slash';
+                    this.innerHTML = '<i class="fa-regular fa-eye-slash"></i> Show';
+                }
+            });
+        });
     </script>
 </body>
 </html>

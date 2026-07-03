@@ -78,8 +78,9 @@
 
           <p class="signup-note">Don't have an account? <a class="link-text" href="signup.html">Create one</a></p>
           
+          <!-- BETULKAN: Pautan ke Admin/adminlogin.html -->
           <p class="signup-note" style="margin-top: 12px; font-size: 0.85rem; opacity: 0.8;">
-            Are you an administrator? <a class="link-text" href="adminlogin.html" style="text-decoration: underline;">Access Admin Portal</a>
+            Are you an administrator? <a class="link-text" href="Admin/adminlogin.html" style="text-decoration: underline;">Access Admin Portal</a>
           </p>
           
         </article>
@@ -120,7 +121,7 @@
       // 1. Apabila form diserahkan (submit) dan sah, sekat pembukaan URL dan tunjuk modal
       loginForm?.addEventListener('submit', (event) => {
         event.preventDefault(); 
-        roleModalOverlay.classList.add('active'); // Aktifkan modal (style dari style.css gabungan)
+        roleModalOverlay.classList.add('active');
       });
 
       // 2. Tutup modal melalui butang pangkah (X)
@@ -134,11 +135,11 @@
         roleModalOverlay.classList.remove('active');
 
         if (selectedRole === 'freelancer') {
-          window.location.href = 'dashboard_freelancer.html';
+          window.location.href = 'Freelancer_HTML/dashboard_freelancer.html';
         } else if (selectedRole === 'client') {
-          window.location.href = 'dashboard_client.html';
+          window.location.href = 'Client/dashboard_client.html';
         } else {
-          window.location.href = 'dashboard_client.html';
+          window.location.href = 'Client/dashboard_client.html';
         }
       });
 

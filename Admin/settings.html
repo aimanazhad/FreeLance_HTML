@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Settings - Admin Dashboard</title>
+  <link rel="stylesheet" href="admin-style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    .page-header p {
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .header-actions-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: #4f46e5;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Settings Layout */
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 24px;
+    }
+
+    /* Settings Sidebar */
+    .settings-sidebar {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 8px;
+      height: fit-content;
+    }
+
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: #6b7280;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .settings-nav-item:hover {
+      background: #f9fafb;
+      color: #1f2937;
+    }
+
+    .settings-nav-item.active {
+      background: #eef2ff;
+      color: #6366f1;
+      font-weight: 600;
+    }
+
+    .settings-nav-item i {
+      width: 20px;
+      font-size: 16px;
+    }
+
+    /* Settings Content */
+    .settings-content {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 28px;
+    }
+
+    .settings-content .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+
+    .settings-content .section-desc {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+
+    /* Settings Groups */
+    .settings-group {
+      margin-bottom: 28px;
+    }
+
+    .settings-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .settings-group .group-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .settings-group .group-title i {
+      color: #6366f1;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+
+    .setting-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+    }
+
+    .setting-label .setting-desc {
+      display: block;
+      font-size: 12px;
+      font-weight: 400;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    .setting-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .setting-control input[type="text"],
+    .setting-control input[type="email"],
+    .setting-control input[type="number"],
+    .setting-control select {
+      padding: 8px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #1f2937;
+      background: white;
+      outline: none;
+      min-width: 200px;
+      transition: all 0.2s ease;
+    }
+
+    .setting-control input:focus,
+    .setting-control select:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #d1d5db;
+      border-radius: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: #6366f1;
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    /* Action Buttons at bottom */
+    .settings-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .btn-save {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 10px 32px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-save:hover {
+      background: #4f46e5;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-restore {
+      background: transparent;
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-restore:hover {
+      background: #f9fafb;
+    }
+
+    .btn-export {
+      background: transparent;
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-export:hover {
+      background: #f9fafb;
+    }
+
+    /* Danger Zone */
+    .danger-zone {
+      margin-top: 24px;
+      padding: 20px;
+      border: 2px solid #fecaca;
+      border-radius: 12px;
+      background: #fef2f2;
+    }
+
+    .danger-zone .danger-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #dc2626;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .danger-zone .danger-desc {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 12px;
+    }
+
+    .danger-zone .danger-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* Footer */
+    .footer-bar {
+      margin-top: 28px;
+      padding: 16px 20px;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    .footer-bar .footer-version {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer-bar .footer-version span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .settings-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-sidebar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 8px;
+      }
+
+      .settings-nav-item {
+        padding: 8px 14px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .header-actions-right {
+        flex-wrap: wrap;
+      }
+
+      .settings-content {
+        padding: 20px;
+      }
+
+      .setting-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 16px 0;
+      }
+
+      .setting-control {
+        width: 100%;
+      }
+
+      .setting-control input[type="text"],
+      .setting-control input[type="email"],
+      .setting-control input[type="number"],
+      .setting-control select {
+        min-width: 100%;
+        width: 100%;
+      }
+
+      .settings-actions {
+        flex-wrap: wrap;
+      }
+
+      .settings-actions .btn-save,
+      .settings-actions .btn-restore,
+      .settings-actions .btn-export {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .danger-zone .danger-actions {
+        flex-direction: column;
+      }
+
+      .footer-bar {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .settings-sidebar {
+        flex-direction: column;
+      }
+
+      .settings-nav-item {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="admin-dashboard-body">
+
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-chart-line logo-icon"></i>
+          <div>
+            <span class="brand-title">Freelance</span>
+            <span class="brand-subtitle">Marketplace</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+  <a href="dashboard_admin.html" class="menu-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+  <a href="manage_users.html" class="menu-item"><i class="fa-solid fa-users"></i> Manage Users</a>
+  <a href="manage_jobs.html" class="menu-item"><i class="fa-solid fa-briefcase"></i> Manage Jobs</a>
+  <a href="reports.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+  <a href="messages.html" class="menu-item"><i class="fa-solid fa-comment-dots"></i> Messages</a>
+  <a href="settings.html" class="menu-item active"><i class="fa-solid fa-gear"></i> Settings</a>
+  <a href="profile.html" class="menu-item"><i class="fa-solid fa-user"></i> Profile</a>
+  <a href="../index.html" class="menu-item" style="margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 16px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+</nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div>
+          <h1>System Settings</h1>
+          <p>Manage platform configuration, security, and administrative preferences.</p>
+        </div>
+        <div class="header-actions-right">
+          <button class="btn-outline" onclick="restoreDefaults()">
+            <i class="fa-solid fa-rotate-left"></i> Restore Defaults
+          </button>
+          <button class="btn-outline">
+            <i class="fa-solid fa-download"></i> Export
+          </button>
+          <button class="btn-primary" onclick="saveSettings()">
+            <i class="fa-regular fa-floppy-disk"></i> Save Configuration
+          </button>
+        </div>
+      </div>
+
+      <!-- SETTINGS LAYOUT -->
+      <div class="settings-layout">
+        
+        <!-- Settings Sidebar Navigation -->
+        <aside class="settings-sidebar">
+          <a class="settings-nav-item active" data-section="general">
+            <i class="fa-solid fa-sliders"></i> General
+          </a>
+          <a class="settings-nav-item" data-section="security">
+            <i class="fa-solid fa-shield-halved"></i> Security
+          </a>
+          <a class="settings-nav-item" data-section="appearance">
+            <i class="fa-solid fa-palette"></i> Appearance
+          </a>
+          <a class="settings-nav-item" data-section="notifications">
+            <i class="fa-regular fa-bell"></i> Notifications
+          </a>
+          <a class="settings-nav-item" data-section="users">
+            <i class="fa-solid fa-users-gear"></i> User Management
+          </a>
+          <a class="settings-nav-item" data-section="payments">
+            <i class="fa-solid fa-credit-card"></i> Payments
+          </a>
+          <a class="settings-nav-item" data-section="integrations">
+            <i class="fa-solid fa-plug"></i> Integrations
+          </a>
+        </aside>
+
+        <!-- Settings Content -->
+        <div class="settings-content" id="settingsContent">
+          
+          <!-- General Settings -->
+          <div id="section-general">
+            <h2 class="section-title">General Settings</h2>
+            <p class="section-desc">Configure basic platform information and preferences.</p>
+
+            <div class="settings-group">
+              <div class="group-title"><i class="fa-regular fa-building"></i> Platform Information</div>
+              
+              <div class="setting-row">
+                <div class="setting-label">
+                  Platform Name
+                  <span class="setting-desc">The name of your platform displayed to users</span>
+                </div>
+                <div class="setting-control">
+                  <input type="text" value="Freelance Marketplace">
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Admin Email
+                  <span class="setting-desc">Primary email for system notifications</span>
+                </div>
+                <div class="setting-control">
+                  <input type="email" value="admin@frm@gmail.com">
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  System Timezone
+                  <span class="setting-desc">Default timezone for all system operations</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="Asia/Kuala_Lumpur" selected>Asia/Kuala_Lumpur (GMT+8)</option>
+                    <option value="Asia/Singapore">Asia/Singapore (GMT+8)</option>
+                    <option value="UTC">UTC (GMT+0)</option>
+                    <option value="America/New_York">America/New_York (GMT-5)</option>
+                    <option value="Europe/London">Europe/London (GMT+0)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Enable Beta Features
+                  <span class="setting-desc">Allow users to access experimental features</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="group-title"><i class="fa-regular fa-clock"></i> Maintenance</div>
+              
+              <div class="setting-row">
+                <div class="setting-label">
+                  Maintenance Mode
+                  <span class="setting-desc">Put the platform in maintenance mode</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Security Settings -->
+          <div id="section-security" style="display:none;">
+            <h2 class="section-title">Security Settings</h2>
+            <p class="section-desc">Configure platform security and authentication policies.</p>
+
+            <div class="settings-group">
+              <div class="group-title"><i class="fa-solid fa-lock"></i> Authentication</div>
+              
+              <div class="setting-row">
+                <div class="setting-label">
+                  Minimum Password Length
+                  <span class="setting-desc">Minimum characters required for user passwords</span>
+                </div>
+                <div class="setting-control">
+                  <input type="number" value="10" min="6" max="20" style="width:100px;">
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Enable Two-Factor Authentication (2FA)
+                  <span class="setting-desc">Require 2FA for all admin accounts</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Session Timeout
+                  <span class="setting-desc">Auto-logout inactive users after this duration</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="15">15 minutes</option>
+                    <option value="30" selected>30 minutes</option>
+                    <option value="60">1 hour</option>
+                    <option value="120">2 hours</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Login Attempts Limit
+                  <span class="setting-desc">Max failed login attempts before account lockout</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="3">3 attempts</option>
+                    <option value="5" selected>5 attempts</option>
+                    <option value="10">10 attempts</option>
+                    <option value="unlimited">Unlimited</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Appearance Settings -->
+          <div id="section-appearance" style="display:none;">
+            <h2 class="section-title">Appearance Settings</h2>
+            <p class="section-desc">Customize the look and feel of your platform.</p>
+
+            <div class="settings-group">
+              <div class="group-title"><i class="fa-solid fa-palette"></i> Theme</div>
+              
+              <div class="setting-row">
+                <div class="setting-label">
+                  Default Theme
+                  <span class="setting-desc">Select the default theme for all users</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="light" selected>Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="system">System Default</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Primary Color
+                  <span class="setting-desc">Platform primary brand color</span>
+                </div>
+                <div class="setting-control">
+                  <input type="color" value="#6366f1" style="width:60px;height:40px;padding:2px;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;">
+                  <span style="font-size:13px;color:#6b7280;">#6366f1</span>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Allow Users to Customize Theme
+                  <span class="setting-desc">Let users choose their own theme preference</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="group-title"><i class="fa-regular fa-image"></i> Branding</div>
+              
+              <div class="setting-row">
+                <div class="setting-label">
+                  Platform Logo
+                  <span class="setting-desc">Upload custom platform logo</span>
+                </div>
+                <div class="setting-control">
+                  <button class="btn-outline" style="padding:6px 16px;font-size:13px;">
+                    <i class="fa-solid fa-upload"></i> Upload Logo
+                  </button>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Favicon
+                  <span class="setting-desc">Upload custom favicon</span>
+                </div>
+                <div class="setting-control">
+                  <button class="btn-outline" style="padding:6px 16px;font-size:13px;">
+                    <i class="fa-solid fa-upload"></i> Upload Favicon
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications Settings -->
+          <div id="section-notifications" style="display:none;">
+            <h2 class="section-title">Notification Settings</h2>
+            <p class="section-desc">Configure system notification preferences.</p>
+
+            <div class="settings-group">
+              <div class="group-title"><i class="fa-regular fa-envelope"></i> Email Notifications</div>
+              
+              <div class="setting-row">
+                <div class="setting-label">
+                  System Updates
+                  <span class="setting-desc">Receive email for system updates</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  User Registration Alerts
+                  <span class="setting-desc">Get notified when new users register</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Report Notifications
+                  <span class="setting-desc">Receive notifications when reports are generated</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Security Alerts
+                  <span class="setting-desc">Critical security notifications</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Management Settings -->
+          <div id="section-users" style="display:none;">
+            <h2 class="section-title">User Management</h2>
+            <p class="section-desc">Configure user registration and management policies.</p>
+
+            <div class="settings-group">
+              <div class="group-title"><i class="fa-solid fa-user-plus"></i> Registration</div>
+              
+              <div class="setting-row">
+                <div class="setting-label">
+                  Allow New Registrations
+                  <span class="setting-desc">Enable or disable new user sign-ups</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Email Verification Required
+                  <span class="setting-desc">Users must verify email before accessing platform</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Default User Role
+                  <span class="setting-desc">Default role assigned to new users</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="freelancer" selected>Freelancer</option>
+                    <option value="client">Client</option>
+                    <option value="pending">Pending Approval</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payments Settings -->
+          <div id="section-payments" style="display:none;">
+            <h2 class="section-title">Payment Settings</h2>
+            <p class="section-desc">Configure platform payment and transaction settings.</p>
+
+            <div class="settings-group">
+              <div class="group-title"><i class="fa-solid fa-credit-card"></i> Payment Processing</div>
+              
+              <div class="setting-row">
+                <div class="setting-label">
+                  Default Currency
+                  <span class="setting-desc">Primary currency for all transactions</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="MYR" selected>Malaysian Ringgit (MYR)</option>
+                    <option value="USD">US Dollar (USD)</option>
+                    <option value="EUR">Euro (EUR)</option>
+                    <option value="SGD">Singapore Dollar (SGD)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Platform Fee
+                  <span class="setting-desc">Percentage fee charged per transaction</span>
+                </div>
+                <div class="setting-control">
+                  <input type="number" value="5" min="0" max="20" style="width:80px;"> <span style="color:#6b7280;">%</span>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Enable Payment Gateway
+                  <span class="setting-desc">Allow users to make payments through platform</span>
+                </div>
+                <div class="setting-control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Payment Gateway
+                  <span class="setting-desc">Select primary payment provider</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="stripe" selected>Stripe</option>
+                    <option value="paypal">PayPal</option>
+                    <option value="midtrans">Midtrans</option>
+                    <option value="tng">Touch 'n Go</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Integrations Settings -->
+          <div id="section-integrations" style="display:none;">
+            <h2 class="section-title">Integration Settings</h2>
+            <p class="section-desc">Configure third-party integrations and APIs.</p>
+
+            <div class="settings-group">
+              <div class="group-title"><i class="fa-solid fa-plug"></i> Third-Party Services</div>
+              
+              <div class="setting-row">
+                <div class="setting-label">
+                  Email Service Provider
+                  <span class="setting-desc">Select email provider for system emails</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="sendgrid" selected>SendGrid</option>
+                    <option value="mailgun">Mailgun</option>
+                    <option value="smtp">SMTP</option>
+                    <option value="amazon">Amazon SES</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Analytics Provider
+                  <span class="setting-desc">Platform analytics and tracking</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="google" selected>Google Analytics</option>
+                    <option value="mixpanel">Mixpanel</option>
+                    <option value="amplitude">Amplitude</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="setting-row">
+                <div class="setting-label">
+                  Storage Provider
+                  <span class="setting-desc">Cloud storage for files and assets</span>
+                </div>
+                <div class="setting-control">
+                  <select>
+                    <option value="aws" selected>AWS S3</option>
+                    <option value="gcp">Google Cloud Storage</option>
+                    <option value="azure">Azure Blob</option>
+                    <option value="local">Local Storage</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings Actions -->
+          <div class="settings-actions">
+            <button class="btn-save" onclick="saveSettings()">
+              <i class="fa-regular fa-floppy-disk"></i> Save All Settings
+            </button>
+            <button class="btn-restore" onclick="restoreDefaults()">
+              <i class="fa-solid fa-rotate-left"></i> Restore Defaults
+            </button>
+            <button class="btn-export">
+              <i class="fa-solid fa-download"></i> Export Settings
+            </button>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="danger-zone">
+            <div class="danger-title">
+              <i class="fa-solid fa-triangle-exclamation"></i> Danger Zone
+            </div>
+            <p class="danger-desc">These actions cannot be undone. Proceed with caution.</p>
+            <div class="danger-actions">
+              <button class="btn-outline" style="border-color:#fecaca;color:#dc2626;">
+                <i class="fa-solid fa-rotate"></i> Reset All Settings
+              </button>
+              <button class="btn-danger">
+                <i class="fa-solid fa-trash-can"></i> Clear All Data
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer-bar">
+        <span>Freelance Marketplace Admin</span>
+        <div class="footer-version">
+          <span><i class="fa-regular fa-circle-check"></i> v2.1</span>
+          <span><i class="fa-regular fa-copyright"></i> 2025</span>
+          <span><i class="fa-regular fa-heart" style="color:#ef4444;"></i> All rights reserved</span>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // Navigation between settings sections
+    document.querySelectorAll('.settings-nav-item').forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Remove active class from all
+        document.querySelectorAll('.settings-nav-item').forEach(nav => {
+          nav.classList.remove('active');
+        });
+        
+        // Add active class to clicked
+        this.classList.add('active');
+        
+        // Get section ID
+        const sectionId = this.dataset.section;
+        
+        // Hide all sections
+        document.querySelectorAll('.settings-content > div[id^="section-"]').forEach(section => {
+          section.style.display = 'none';
+        });
+        
+        // Show selected section
+        const targetSection = document.getElementById('section-' + sectionId);
+        if (targetSection) {
+          targetSection.style.display = 'block';
+        }
+      });
+    });
+
+    // Save Settings function
+    function saveSettings() {
+      alert('Settings saved successfully! ✅\n\nAll configuration changes have been applied.');
+    }
+
+    // Restore Defaults function
+    function restoreDefaults() {
+      if (confirm('⚠️ Are you sure you want to restore all settings to default values?')) {
+        alert('Settings restored to defaults! 🔄\n\nAll settings have been reset to their default values.');
+      }
+    }
+  </script>
+
+</body>
+</html>

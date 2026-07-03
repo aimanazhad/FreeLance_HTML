@@ -503,3 +503,19 @@ form label, .login-form label, .input-group label {
   .row-between, .social-grid { grid-template-columns: 1fr; display: grid; }
   .mini-badges { gap: 8px; }
 }
+
+/* Tambah di bahagian Action Buttons & Divider */
+.social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Betulkan responsive */
+@media (max-width: 560px) {
+  .auth-page, .signup-container { padding: 12px; }
+  .brand-panel, .banner-panel, .form-panel { padding: 20px; }
+  .row-between { flex-direction: column; align-items: flex-start; }
+  .social-grid { grid-template-columns: 1fr; }
+  .mini-badges { gap: 8px; }
+}

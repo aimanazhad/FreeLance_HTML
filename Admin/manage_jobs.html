@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Jobs - Admin Dashboard</title>
+  <link rel="stylesheet" href="admin-style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    .page-header p {
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .header-actions-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: #4f46e5;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    /* Stats Mini Cards */
+    .stats-mini {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-mini-card {
+      background: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .stat-mini-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .stat-mini-icon.total { background: #eff6ff; color: #3b82f6; }
+    .stat-mini-icon.open { background: #f0fdf4; color: #22c55e; }
+    .stat-mini-icon.progress { background: #fffbeb; color: #f59e0b; }
+    .stat-mini-icon.completed { background: #f5f3ff; color: #8b5cf6; }
+
+    .stat-mini-info .stat-mini-number {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .stat-mini-info .stat-mini-label {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* Filter & Search */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .filter-left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-select {
+      padding: 8px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #1f2937;
+      background: white;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .filter-select:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .search-box-large {
+      position: relative;
+      width: 320px;
+    }
+
+    .search-box-large input {
+      width: 100%;
+      padding: 10px 16px 10px 44px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: white;
+      transition: all 0.2s ease;
+    }
+
+    .search-box-large input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .search-box-large i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+    }
+
+    /* Jobs Table */
+    .job-table-wrapper {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+    }
+
+    .table-header-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table-header-tools .table-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1f2937;
+    }
+
+    .table-header-tools .table-count {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    .job-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .job-table th {
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .job-table td {
+      padding: 16px;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .job-table tr:hover td {
+      background: #f9fafb;
+    }
+
+    .job-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .job-info .job-title {
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .job-info .job-category {
+      display: block;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .job-info .job-client {
+      display: block;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .badge-status {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .badge-active { background: #f0fdf4; color: #22c55e; }
+    .badge-progress { background: #fffbeb; color: #f59e0b; }
+    .badge-draft { background: #f3f4f6; color: #6b7280; }
+    .badge-completed { background: #f5f3ff; color: #8b5cf6; }
+
+    .applicants-count {
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .applicants-count small {
+      font-weight: 400;
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .job-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .action-btn.view {
+      background: #eff6ff;
+      color: #3b82f6;
+    }
+
+    .action-btn.view:hover {
+      background: #dbeafe;
+    }
+
+    .action-btn.edit {
+      background: #f5f3ff;
+      color: #8b5cf6;
+    }
+
+    .action-btn.edit:hover {
+      background: #ede9fe;
+    }
+
+    .action-btn.delete {
+      background: #fef2f2;
+      color: #ef4444;
+    }
+
+    .action-btn.delete:hover {
+      background: #fee2e2;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .pagination-info {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .pagination-buttons {
+      display: flex;
+      gap: 4px;
+    }
+
+    .pagination-buttons button {
+      padding: 6px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      background: white;
+      color: #1f2937;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-buttons button:hover {
+      background: #f9fafb;
+    }
+
+    .pagination-buttons button.active {
+      background: #6366f1;
+      color: white;
+      border-color: #6366f1;
+    }
+
+    .pagination-buttons button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .stats-mini {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box-large {
+        width: 100%;
+      }
+
+      .stats-mini {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .job-table th,
+      .job-table td {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+
+      .job-actions {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-mini {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-left {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .filter-select {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="admin-dashboard-body">
+
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-chart-line logo-icon"></i>
+          <div>
+            <span class="brand-title">Freelance</span>
+            <span class="brand-subtitle">Marketplace</span>
+          </div>
+        </div>
+      </div>
+
+     <nav class="sidebar-menu">
+  <a href="dashboard_admin.html" class="menu-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+  <a href="manage_users.html" class="menu-item"><i class="fa-solid fa-users"></i> Manage Users</a>
+  <a href="manage_jobs.html" class="menu-item active"><i class="fa-solid fa-briefcase"></i> Manage Jobs</a>
+  <a href="reports.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+  <a href="messages.html" class="menu-item"><i class="fa-solid fa-comment-dots"></i> Messages</a>
+  <a href="settings.html" class="menu-item"><i class="fa-solid fa-gear"></i> Settings</a>
+  <a href="profile.html" class="menu-item"><i class="fa-solid fa-user"></i> Profile</a>
+  <a href="../index.html" class="menu-item" style="margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 16px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+</nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <h1>Manage Jobs</h1>
+    <p>View and manage all registered job postings</p>
+  </div>
+  <div class="header-actions-right">
+    <button class="btn-outline">
+      <i class="fa-solid fa-download"></i> Export
+    </button>
+    <!-- POST NEW JOB BUTTON - NAVIGATE TO post_job.html -->
+    <a href="post_job.html" class="btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:10px 24px;border-radius:10px;background:#6366f1;color:white;font-weight:600;font-size:14px;border:none;cursor:pointer;transition:all 0.2s ease;">
+      <i class="fa-solid fa-plus"></i> Post New Job
+    </a>
+  </div>
+</div>
+
+      <!-- STATS MINI CARDS -->
+      <div class="stats-mini">
+        <div class="stat-mini-card">
+          <div class="stat-mini-icon total">
+            <i class="fa-solid fa-briefcase"></i>
+          </div>
+          <div class="stat-mini-info">
+            <div class="stat-mini-number">120</div>
+            <div class="stat-mini-label">Total Jobs</div>
+          </div>
+        </div>
+        <div class="stat-mini-card">
+          <div class="stat-mini-icon open">
+            <i class="fa-solid fa-folder-open"></i>
+          </div>
+          <div class="stat-mini-info">
+            <div class="stat-mini-number">45</div>
+            <div class="stat-mini-label">Open Jobs</div>
+          </div>
+        </div>
+        <div class="stat-mini-card">
+          <div class="stat-mini-icon progress">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+          <div class="stat-mini-info">
+            <div class="stat-mini-number">18</div>
+            <div class="stat-mini-label">In Progress</div>
+          </div>
+        </div>
+        <div class="stat-mini-card">
+          <div class="stat-mini-icon completed">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="stat-mini-info">
+            <div class="stat-mini-number">57</div>
+            <div class="stat-mini-label">Completed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="filter-left">
+          <div class="search-box-large">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search jobs by title, category or client...">
+          </div>
+          <select class="filter-select">
+            <option value="">All Categories</option>
+            <option value="graphic">Graphic Design</option>
+            <option value="web">Web Development</option>
+            <option value="writing">Writing</option>
+            <option value="marketing">Marketing</option>
+            <option value="programming">Programming</option>
+          </select>
+          <select class="filter-select">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="progress">In Progress</option>
+            <option value="draft">Draft</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div class="filter-right">
+          <select class="filter-select">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="popular">Most Popular</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- JOBS TABLE -->
+      <div class="job-table-wrapper">
+        <div class="table-header-tools">
+          <span class="table-title">All Job Postings</span>
+          <span class="table-count">Showing 1-5 of 120 jobs</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="job-table">
+            <thead>
+              <tr>
+                <th>Job Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Applicants</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="job-info">
+                    <span class="job-title">Logo Design for Cafe Brand</span>
+                    <span class="job-client">Client: Ali123</span>
+                  </div>
+                </td>
+                <td><span style="font-size:13px;color:#6b7280;">Graphic Design</span></td>
+                <td><span class="badge-status badge-active">Active</span></td>
+                <td><span class="applicants-count">18 <small>applicants</small></span></td>
+                <td style="font-size:13px;color:#6b7280;">2 May 2025</td>
+                <td>
+                  <div class="job-actions">
+                    <button class="action-btn view" title="View"><i class="fa-regular fa-eye"></i></button>
+                    <button class="action-btn edit" title="Edit"><i class="fa-regular fa-pen-to-square"></i></button>
+                    <button class="action-btn delete" title="Delete"><i class="fa-regular fa-trash-can"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="job-info">
+                    <span class="job-title">Social Media Management</span>
+                    <span class="job-client">Client: Siti Nadirah</span>
+                  </div>
+                </td>
+                <td><span style="font-size:13px;color:#6b7280;">Marketing</span></td>
+                <td><span class="badge-status badge-active">Active</span></td>
+                <td><span class="applicants-count">5 <small>applicants</small></span></td>
+                <td style="font-size:13px;color:#6b7280;">18 May 2025</td>
+                <td>
+                  <div class="job-actions">
+                    <button class="action-btn view" title="View"><i class="fa-regular fa-eye"></i></button>
+                    <button class="action-btn edit" title="Edit"><i class="fa-regular fa-pen-to-square"></i></button>
+                    <button class="action-btn delete" title="Delete"><i class="fa-regular fa-trash-can"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="job-info">
+                    <span class="job-title">Website Development (E-comm)</span>
+                    <span class="job-client">Client: Muhammad Afiq</span>
+                  </div>
+                </td>
+                <td><span style="font-size:13px;color:#6b7280;">Web Development</span></td>
+                <td><span class="badge-status badge-progress">In Progress</span></td>
+                <td><span class="applicants-count">45 <small>applicants</small></span></td>
+                <td style="font-size:13px;color:#6b7280;">18 May 2025</td>
+                <td>
+                  <div class="job-actions">
+                    <button class="action-btn view" title="View"><i class="fa-regular fa-eye"></i></button>
+                    <button class="action-btn edit" title="Edit"><i class="fa-regular fa-pen-to-square"></i></button>
+                    <button class="action-btn delete" title="Delete"><i class="fa-regular fa-trash-can"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="job-info">
+                    <span class="job-title">Content Writing for Blog</span>
+                    <span class="job-client">Client: Aisyah Amirah</span>
+                  </div>
+                </td>
+                <td><span style="font-size:13px;color:#6b7280;">Writing</span></td>
+                <td><span class="badge-status badge-completed">Completed</span></td>
+                <td><span class="applicants-count">9 <small>applicants</small></span></td>
+                <td style="font-size:13px;color:#6b7280;">23 May 2025</td>
+                <td>
+                  <div class="job-actions">
+                    <button class="action-btn view" title="View"><i class="fa-regular fa-eye"></i></button>
+                    <button class="action-btn edit" title="Edit"><i class="fa-regular fa-pen-to-square"></i></button>
+                    <button class="action-btn delete" title="Delete"><i class="fa-regular fa-trash-can"></i></button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="job-info">
+                    <span class="job-title">Python Script for Data Analysis</span>
+                    <span class="job-client">Client: Jamid09</span>
+                  </div>
+                </td>
+                <td><span style="font-size:13px;color:#6b7280;">Programming</span></td>
+                <td><span class="badge-status badge-active">Active</span></td>
+                <td><span class="applicants-count">0 <small>applicants</small></span></td>
+                <td style="font-size:13px;color:#6b7280;">26 May 2025</td>
+                <td>
+                  <div class="job-actions">
+                    <button class="action-btn view" title="View"><i class="fa-regular fa-eye"></i></button>
+                    <button class="action-btn edit" title="Edit"><i class="fa-regular fa-pen-to-square"></i></button>
+                    <button class="action-btn delete" title="Delete"><i class="fa-regular fa-trash-can"></i></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination">
+          <span class="pagination-info">Showing 1 to 5 of 120 entries</span>
+          <div class="pagination-buttons">
+            <button disabled><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="active">1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>...</button>
+            <button>24</button>
+            <button><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+</body>
+</html>

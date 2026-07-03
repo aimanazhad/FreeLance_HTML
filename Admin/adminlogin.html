@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Portal - Freelance Marketplace</title>
-  <link rel="stylesheet" href="style.css">
+  <!-- BETULKAN: Pautan ke style.css di root (gunakan ../) -->
+  <link rel="stylesheet" href="../style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -41,7 +42,7 @@
           <p class="muted">Please provide your authorized official staff ID/email address and system passphrase.</p>
         </div>
 
-        <form class="login-form" id="adminLoginForm" action="#" method="POST">
+        <form class="login-form" id="adminLoginForm">
           
           <div class="input-group">
             <label for="admin-email">Official Admin Email / Staff ID</label>
@@ -73,8 +74,9 @@
 
         </form>
 
+        <!-- BETULKAN: Pautan ke index.html di root -->
         <div class="login-redirect">
-          Not an admin? <a href="index.html">Return to User Login</a>
+          Not an admin? <a href="../index.html">Return to User Login</a>
         </div>
       </div>
 
@@ -82,7 +84,7 @@
   </div>
 
   <script>
-    // Fungsi sedia ada untuk sembunyi/papar kata laluan
+    // Fungsi untuk sembunyi/papar kata laluan
     function toggleAdminPass() {
       const passInput = document.getElementById("admin-password");
       const toggleBtn = document.querySelector(".toggle-password");
@@ -96,18 +98,18 @@
       }
     }
 
-    // BARU: Logik untuk pengesahan borang dan navigasi automatik
+    // Logik untuk pengesahan borang dan navigasi automatik
     document.getElementById("adminLoginForm").addEventListener("submit", function(event) {
-      // Menghalang borang daripada refresh halaman secara default
       event.preventDefault(); 
       
       const email = document.getElementById("admin-email").value;
       const password = document.getElementById("admin-password").value;
 
-      // Memastikan input emel dan kata laluan tidak kosong (Validasi HTML5 'required' turut membantu)
       if (email && password) {
-        // Navigasi terus ke fail halaman Admin Dashboard anda
+        // BETULKAN: Pautan ke dashboard_admin.html dalam folder yang sama
         window.location.href = "dashboard_admin.html"; 
+      } else {
+        alert('Please fill in all fields.');
       }
     });
   </script>

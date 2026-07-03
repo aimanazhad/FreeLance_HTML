@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add User - Admin Dashboard</title>
+  <link rel="stylesheet" href="admin-style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1f2937;
+    }
+
+    .page-header p {
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .header-actions-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-primary {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: #4f46e5;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .btn-success {
+      background: #22c55e;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Form Container */
+    .form-container {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      padding: 32px;
+    }
+
+    .form-container .form-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .form-group label .required {
+      color: #ef4444;
+      margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #1f2937;
+      background: white;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: #9ca3af;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-group .helper-text {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #d1d5db;
+      border-radius: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: #6366f1;
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+    }
+
+    /* Form Actions */
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .header-actions-right {
+        flex-wrap: wrap;
+        width: 100%;
+      }
+
+      .header-actions-right .btn-primary,
+      .header-actions-right .btn-outline,
+      .header-actions-right .btn-success {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full-width {
+        grid-column: 1;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .form-actions .btn-primary,
+      .form-actions .btn-outline,
+      .form-actions .btn-success {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .form-container {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .form-container {
+        padding: 16px;
+      }
+
+      .toggle-label {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body class="admin-dashboard-body">
+
+  <div class="dashboard-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-chart-line logo-icon"></i>
+          <div>
+            <span class="brand-title">Freelance</span>
+            <span class="brand-subtitle">Marketplace</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="dashboard_admin.html" class="menu-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <a href="manage_users.html" class="menu-item active"><i class="fa-solid fa-users"></i> Manage Users</a>
+        <a href="manage_jobs.html" class="menu-item"><i class="fa-solid fa-briefcase"></i> Manage Jobs</a>
+        <a href="reports.html" class="menu-item"><i class="fa-solid fa-chart-pie"></i> Reports</a>
+        <a href="messages.html" class="menu-item"><i class="fa-solid fa-comment-dots"></i> Messages</a>
+        <a href="settings.html" class="menu-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="profile.html" class="menu-item"><i class="fa-solid fa-user"></i> Profile</a>
+        <a href="../index.html" class="menu-item" style="margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 16px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div>
+          <h1>Add New User</h1>
+          <p>Create a new user account for the platform</p>
+        </div>
+        <div class="header-actions-right">
+          <a href="manage_users.html" class="btn-outline">
+            <i class="fa-solid fa-arrow-left"></i> Cancel
+          </a>
+          <button type="submit" form="addUserForm" class="btn-success">
+            <i class="fa-regular fa-floppy-disk"></i> Save User
+          </button>
+        </div>
+      </div>
+
+      <!-- FORM -->
+      <div class="form-container">
+        <h2 class="form-title"><i class="fa-regular fa-user-plus" style="color:#6366f1;margin-right:10px;"></i> User Information</h2>
+
+        <form id="addUserForm">
+          <div class="form-grid">
+            <!-- Full Name -->
+            <div class="form-group">
+              <label for="fullName">Full Name <span class="required">*</span></label>
+              <input type="text" id="fullName" placeholder="Enter full name" required>
+            </div>
+
+            <!-- Username -->
+            <div class="form-group">
+              <label for="username">Username <span class="required">*</span></label>
+              <input type="text" id="username" placeholder="Enter username" required>
+              <span class="helper-text">Must be unique, 3-20 characters</span>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label for="email">Email Address <span class="required">*</span></label>
+              <input type="email" id="email" placeholder="user@example.com" required>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" placeholder="+6012 345 6789">
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+              <label for="password">Password <span class="required">*</span></label>
+              <input type="password" id="password" placeholder="Enter password" required>
+              <span class="helper-text">Minimum 8 characters</span>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+              <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+            </div>
+
+            <!-- Role -->
+            <div class="form-group">
+              <label for="role">Role <span class="required">*</span></label>
+              <select id="role" required>
+                <option value="">Select role...</option>
+                <option value="freelancer">Freelancer</option>
+                <option value="client">Client</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+
+            <!-- Status -->
+            <div class="form-group">
+              <label for="status">Status <span class="required">*</span></label>
+              <select id="status" required>
+                <option value="active">Active</option>
+                <option value="suspended">Suspended</option>
+                <option value="pending">Pending Approval</option>
+              </select>
+            </div>
+
+            <!-- Department -->
+            <div class="form-group">
+              <label for="department">Department</label>
+              <input type="text" id="department" placeholder="e.g. IT, Marketing, Design">
+            </div>
+
+            <!-- Location -->
+            <div class="form-group">
+              <label for="location">Location</label>
+              <input type="text" id="location" placeholder="e.g. Kuala Lumpur, Malaysia">
+            </div>
+
+            <!-- Bio -->
+            <div class="form-group full-width">
+              <label for="bio">Bio / Description</label>
+              <textarea id="bio" placeholder="Write a short description about the user..."></textarea>
+            </div>
+
+            <!-- Preferences -->
+            <div class="form-group full-width" style="margin-top:8px;">
+              <div style="display:flex;gap:24px;flex-wrap:wrap;">
+                <label class="toggle-label">
+                  <span>Email Verified</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+                <label class="toggle-label">
+                  <span>Send Welcome Email</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+                <label class="toggle-label">
+                  <span>Allow Login</span>
+                  <div class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <a href="manage_users.html" class="btn-outline" style="justify-content:center;">
+              <i class="fa-solid fa-times"></i> Cancel
+            </a>
+            <button type="reset" class="btn-outline" style="justify-content:center;">
+              <i class="fa-solid fa-rotate-left"></i> Reset
+            </button>
+            <button type="submit" class="btn-success" style="justify-content:center;">
+              <i class="fa-regular fa-floppy-disk"></i> Create User
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    document.getElementById('addUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get form values
+      const fullName = document.getElementById('fullName').value;
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const role = document.getElementById('role').value;
+      const status = document.getElementById('status').value;
+
+      // Validation
+      if (!fullName || !username || !email || !password || !confirmPassword || !role || !status) {
+        alert('⚠️ Please fill in all required fields.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert('⚠️ Passwords do not match!');
+        return;
+      }
+
+      if (password.length < 8) {
+        alert('⚠️ Password must be at least 8 characters long!');
+        return;
+      }
+
+      // Success
+      alert('✅ User created successfully!\n\n' +
+        'Name: ' + fullName + '\n' +
+        'Username: ' + username + '\n' +
+        'Email: ' + email + '\n' +
+        'Role: ' + role + '\n' +
+        'Status: ' + status
+      );
+
+      // Redirect back to manage users
+      window.location.href = 'manage_users.html';
+    });
+
+    // Reset form
+    document.querySelector('button[type="reset"]').addEventListener('click', function(e) {
+      if (!confirm('Are you sure you want to reset all fields?')) {
+        e.preventDefault();
+      }
+    });
+  </script>
+
+</body>
+</html>
