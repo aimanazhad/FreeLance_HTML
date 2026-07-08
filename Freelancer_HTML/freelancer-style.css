@@ -464,3 +464,40 @@ body.freelancer-dashboard-body {
 .view-all-central-link:hover {
   color: var(--theme-primary-hover);
 }
+
+.filter-group label{
+    font-size:14px;
+    font-weight:600;
+    color:#2d3561;
+}
+
+.filter-group input,
+.filter-group select{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid #d9def5;
+    border-radius:12px;
+    font-size:14px;
+    outline:none;
+    transition:.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus{
+    border-color:#6c63ff;
+}
+
+.apply-filter-btn{
+    background:#6c63ff;
+    color:white;
+    border:none;
+    padding:14px;
+    border-radius:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.apply-filter-btn:hover{
+    background:#564ce0;
+}
