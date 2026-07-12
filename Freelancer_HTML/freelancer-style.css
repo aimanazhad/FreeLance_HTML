@@ -532,3 +532,35 @@ body.freelancer-dashboard-body {
 .apply-job-btn:hover{
     background:#564ce0;
 }
+
+/* MY APPLICATIONS */
+
+.application-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin:20px 0;
+}
+
+.application-search{
+    flex:1;
+    padding:12px 15px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    font-size:15px;
+    outline:none;
+}
+
+.application-search:focus{
+    border-color:#6366f1;
+}
+
+.application-filter{
+    width:180px;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    font-size:15px;
+    cursor:pointer;
+}
