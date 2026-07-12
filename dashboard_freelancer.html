@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - Freelancer</title>
+<link rel="stylesheet" href="freelancer.css">
+</head>
+<body>
+  <div class="fm-hero">
+    <div class="fm-hero-eyebrow">Welcome back,</div>
+    <h1 id="fm-hero-name">Freelancer! 👋</h1>
+    <p>Find amazing freelance opportunities and grow your skills.</p>
+  </div>
+
+  <div class="fm-stats-grid" id="fm-stats"></div>
+
+  <div class="fm-two-col">
+    <div class="fm-panel">
+      <h2>Recommended Jobs</h2>
+      <div id="fm-recommended"></div>
+    </div>
+    <div class="fm-panel">
+      <h2>My Application Status</h2>
+      <div id="fm-app-status"></div>
+    </div>
+  </div>
+
+<script src="store.js"></script>
+<script src="sidebar.js"></script>
+<script>
+  renderChrome("dashboard");
+  const data = Store.get();
+
+  document.getElementById("fm-hero-name").textContent = data.profile.name + "! 👋";
+
+  const availableJobs = data.jobs.length;
+  const applicationsSent = data.applications.length;
+  const inProgress = data.applications.filter(a => a.status === "In Progress").length;
+  const totalEarnings = data.earnings.balance;
+
+  document.getElementById("fm-stats").innerHTML = `
+    <div class="fm-stat-card">
+      <div class="fm-stat-icon" style="background:#F2EEFF;color:#6C4CE0;">💼</div>
+      <div class="fm-stat-label">Available Jobs</div>
+      <div class="fm-stat-value">${availableJobs}</div>
+      <a class="fm-stat-link" href="browse_jobs.html">View all jobs →</a>
+    </div>
+    <div class="fm-stat-card">
+      <div class="fm-stat-icon" style="background:#E9F1FE;color:#3B7DE0;">📄</div>
+      <div class="fm-stat-label">Applications Sent</div>
+      <div class="fm-stat-value">${applicationsSent}</div>
+      <a class="fm-stat-link" href="my_applications.html">View my applications →</a>
+    </div>
+    <div class="fm-stat-card">
+      <div class="fm-stat-icon" style="background:#EAF6EF;color:#1FAA6D;">⏱</div>
+      <div class="fm-stat-label">In Progress</div>
+      <div class="fm-stat-value">${inProgress}</div>
+      <a class="fm-stat-link" href="my_applications.html">View projects →</a>
+    </div>
+    <div class="fm-stat-card">
+      <div class="fm-stat-icon" style="background:#FDF3E0;color:#E0A93B;">💰</div>
+      <div class="fm-stat-label">Total Earnings</div>
+      <div class="fm-stat-value">${fmtRM(totalEarnings)}</div>
+      <a class="fm-stat-link" href="earnings.html">View earnings →</a>
+    </div>`;
+
+  const recHtml = data.jobs.slice(0, 3).map(j => `
+    <div class="fm-job-item">
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div class="fm-job-icon" style="background:#F2EEFF;color:#6C4CE0;">${j.title[0]}</div>
+        <div>
+          <div class="fm-job-title">${j.title}</div>
+          <div class="fm-job-meta">${j.category} · ${j.daysLeft} days left</div>
+          <div class="fm-job-budget">RM${j.budgetMin} - RM${j.budgetMax}</div>
+        </div>
+      </div>
+      <span class="fm-pill fm-pill-remote">${j.remote ? "Remote" : "Onsite"}</span>
+    </div>`).join("");
+  document.getElementById("fm-recommended").innerHTML = recHtml || `<div class="fm-empty">Tiada job buat masa ini.</div>`;
+
+  const statusClass = { "In Progress": "fm-status-inprogress", "Under Review": "fm-status-underreview", "Rejected": "fm-status-rejected", "Accepted": "fm-status-accepted" };
+  const appHtml = data.applications.slice(0, 4).map(a => `
+    <div class="fm-status-item">
+      <div>
+        <div class="fm-job-title">${a.title}</div>
+        <div class="fm-job-meta">Client: ${a.client}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="${statusClass[a.status] || ''}" style="font-weight:600;font-size:13px;">${a.status}</div>
+        <div class="fm-job-meta">${a.date}</div>
+      </div>
+    </div>`).join("");
+  document.getElementById("fm-app-status").innerHTML = appHtml || `<div class="fm-empty">No applications yet.</div>`;
+</script>
+</body>
+</html>

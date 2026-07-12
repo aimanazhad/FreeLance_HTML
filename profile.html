@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Profile - Freelancer</title>
+<link rel="stylesheet" href="freelancer.css">
+</head>
+<body>
+  <div class="fm-hero">
+    <div class="fm-hero-eyebrow">You</div>
+    <h1>Profile</h1>
+    <p>Update your profile information.</p>
+  </div>
+
+  <div class="fm-panel">
+    <div class="fm-avatar-row">
+      <img id="fm-avatar-preview" src="" alt="">
+      <div class="fm-field" style="margin:0;flex:1;">
+        <label>URL Avatar</label>
+        <input class="fm-input" id="fm-avatar-url">
+      </div>
+    </div>
+    <div class="fm-form-grid">
+      <div class="fm-field"><label>Full Name</label><input class="fm-input" id="fm-name"></div>
+      <div class="fm-field"><label>Email</label><input class="fm-input" id="fm-email"></div>
+    </div>
+    <div class="fm-field"><label>Bio</label><textarea id="fm-bio" rows="3"></textarea></div>
+    <div class="fm-field">
+      <label>Skills</label>
+      <div id="fm-skills-list" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input class="fm-input" id="fm-skill-input" placeholder="Add a skill...">
+        <button class="fm-btn secondary" id="fm-skill-add">Add</button>
+      </div>
+    </div>
+    <button class="fm-btn" id="fm-save-btn">Save Changes</button>
+  </div>
+
+<script src="store.js"></script>
+<script src="sidebar.js"></script>
+<script>
+  renderChrome("profile");
+  let skills = [];
+
+  function load() {
+    const p = Store.get().profile;
+    document.getElementById("fm-avatar-preview").src = p.avatar;
+    document.getElementById("fm-avatar-url").value = p.avatar;
+    document.getElementById("fm-name").value = p.name;
+    document.getElementById("fm-email").value = p.email;
+    document.getElementById("fm-bio").value = p.bio;
+    skills = [...p.skills];
+    renderSkills();
+  }
+
+  function renderSkills() {
+    document.getElementById("fm-skills-list").innerHTML = skills.map((s, i) => `
+      <span class="fm-skill-tag">${s} <button data-i="${i}" class="rm-skill">×</button></span>`).join("");
+    document.querySelectorAll(".rm-skill").forEach(btn => {
+      btn.addEventListener("click", () => { skills.splice(Number(btn.dataset.i), 1); renderSkills(); });
+    });
+  }
+
+  document.getElementById("fm-skill-add").addEventListener("click", () => {
+    const input = document.getElementById("fm-skill-input");
+    const v = input.value.trim();
+    if (v) { skills.push(v); input.value = ""; renderSkills(); }
+  });
+  document.getElementById("fm-avatar-url").addEventListener("input", e => {
+    document.getElementById("fm-avatar-preview").src = e.target.value;
+  });
+
+  document.getElementById("fm-save-btn").addEventListener("click", () => {
+    Store.update(d => {
+      d.profile.avatar = document.getElementById("fm-avatar-url").value.trim() || d.profile.avatar;
+      d.profile.name = document.getElementById("fm-name").value.trim() || d.profile.name;
+      d.profile.email = document.getElementById("fm-email").value.trim();
+      d.profile.bio = document.getElementById("fm-bio").value.trim();
+      d.profile.skills = skills;
+    });
+    toast("Profile saved!");
+    setTimeout(() => location.reload(), 600);
+  });
+
+  load();
+</script>
+</body>
+</html>

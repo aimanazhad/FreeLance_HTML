@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Browse Jobs - Freelancer</title>
+<link rel="stylesheet" href="freelancer.css">
+</head>
+<body>
+  <div class="fm-hero">
+    <div class="fm-hero-eyebrow">Explore</div>
+    <h1>Browse Jobs</h1>
+    <p>Find projects that match your skills.</p>
+  </div>
+
+  <div class="fm-toolbar">
+    <input class="fm-input" id="fm-search" placeholder="Search jobs...">
+    <select class="fm-select" id="fm-cat">
+      <option value="">All Categories</option>
+    </select>
+    <select class="fm-select" id="fm-budget">
+      <option value="">All Budgets</option>
+      <option value="0-200">RM0 - RM200</option>
+      <option value="200-500">RM200 - RM500</option>
+      <option value="500-9999">RM500+</option>
+    </select>
+  </div>
+
+  <div class="fm-jobs-grid" id="fm-jobs"></div>
+
+<script src="store.js"></script>
+<script src="sidebar.js"></script>
+<script>
+  renderChrome("browse");
+  let data = Store.get();
+
+  const cats = [...new Set(data.jobs.map(j => j.category))];
+  document.getElementById("fm-cat").innerHTML += cats.map(c => `<option value="${c}">${c}</option>`).join("");
+
+  function jobCard(j) {
+    const applied = data.applications.some(a => a.jobId === j.id);
+    return `
+    <div class="fm-job-card">
+      <div class="fm-job-card-top">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div class="fm-job-icon" style="background:#F2EEFF;color:#6C4CE0;">${j.title[0]}</div>
+          <div>
+            <div class="fm-job-title">${j.title}</div>
+            <div class="fm-job-meta">${j.category} · ${j.daysLeft} days left</div>
+          </div>
+        </div>
+        <button class="fm-bookmark ${j.bookmarked ? 'active' : ''}" data-id="${j.id}" title="Bookmark">
+          <svg viewBox="0 0 24 24" fill="${j.bookmarked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-4-7 4V5z"/></svg>
+        </button>
+      </div>
+      <div class="fm-job-card-desc">${j.description}</div>
+      <div class="fm-job-card-foot">
+        <div>
+          <div class="fm-job-budget">RM${j.budgetMin} - RM${j.budgetMax}</div>
+          <span class="fm-pill fm-pill-remote">${j.remote ? "Remote" : "Onsite"}</span>
+        </div>
+        <button class="fm-btn apply-btn" data-id="${j.id}" ${applied ? "disabled" : ""}>${applied ? "Applied ✓" : "Apply Now"}</button>
+      </div>
+    </div>`;
+  }
+
+  function renderJobs() {
+    data = Store.get();
+    const q = document.getElementById("fm-search").value.toLowerCase();
+    const cat = document.getElementById("fm-cat").value;
+    const budget = document.getElementById("fm-budget").value;
+    let list = data.jobs.filter(j => j.title.toLowerCase().includes(q));
+    if (cat) list = list.filter(j => j.category === cat);
+    if (budget) {
+      const [min, max] = budget.split("-").map(Number);
+      list = list.filter(j => j.budgetMax >= min && j.budgetMin <= max);
+    }
+    document.getElementById("fm-jobs").innerHTML = list.map(jobCard).join("") || `<div class="fm-empty">No jobs found.</div>`;
+
+    document.querySelectorAll(".fm-bookmark").forEach(btn => {
+      btn.addEventListener("click", () => {
+        Store.update(d => {
+          const job = d.jobs.find(j => j.id === btn.dataset.id);
+          job.bookmarked = !job.bookmarked;
+        });
+        toast("Bookmark updated");
+        renderJobs();
+      });
+    });
+    document.querySelectorAll(".apply-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const job = data.jobs.find(j => j.id === btn.dataset.id);
+        Store.update(d => {
+          d.applications.push({ id: "a" + Date.now(), jobId: job.id, title: job.title, client: job.client, status: "Under Review", date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) });
+        });
+        toast("Application submitted!");
+        renderJobs();
+      });
+    });
+  }
+
+  document.getElementById("fm-search").addEventListener("input", renderJobs);
+  document.getElementById("fm-cat").addEventListener("change", renderJobs);
+  document.getElementById("fm-budget").addEventListener("change", renderJobs);
+  renderJobs();
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Applications - Freelancer</title>
+<link rel="stylesheet" href="freelancer.css">
+</head>
+<body>
+  <div class="fm-hero">
+    <div class="fm-hero-eyebrow">Track</div>
+    <h1>My Applications</h1>
+    <p>Status of all your job applications.</p>
+  </div>
+
+  <div class="fm-panel">
+    <table class="fm-table">
+      <thead><tr><th>Job</th><th>Client</th><th>Date</th><th>Status</th><th></th></tr></thead>
+      <tbody id="fm-apps-body"></tbody>
+    </table>
+  </div>
+
+<script src="store.js"></script>
+<script src="sidebar.js"></script>
+<script>
+  renderChrome("applications");
+
+  const badgeClass = { "In Progress": "fm-badge-inprogress", "Under Review": "fm-badge-underreview", "Rejected": "fm-badge-rejected", "Accepted": "fm-badge-accepted" };
+
+  function renderApps() {
+    const data = Store.get();
+    const rows = data.applications.map(a => `
+      <tr>
+        <td><strong>${a.title}</strong></td>
+        <td>${a.client}</td>
+        <td>${a.date}</td>
+        <td><span class="fm-badge ${badgeClass[a.status] || ''}">${a.status}</span></td>
+        <td>${a.status !== "Rejected" ? `<button class="fm-btn danger withdraw-btn" data-id="${a.id}">Withdraw</button>` : ""}</td>
+      </tr>`).join("");
+    document.getElementById("fm-apps-body").innerHTML = rows || `<tr><td colspan="5" class="fm-empty">No applications yet.</td></tr>`;
+
+    document.querySelectorAll(".withdraw-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (!confirm("Withdraw this application?")) return;
+        Store.update(d => { d.applications = d.applications.filter(a => a.id !== btn.dataset.id); });
+        toast("Application withdrawn.");
+        renderApps();
+      });
+    });
+  }
+  renderApps();
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Settings - Freelancer</title>
+<link rel="stylesheet" href="freelancer.css">
+</head>
+<body>
+  <div class="fm-hero">
+    <div class="fm-hero-eyebrow">Configuration</div>
+    <h1>Settings</h1>
+    <p>Manage your account preferences.</p>
+  </div>
+
+  <div class="fm-two-col" style="grid-template-columns:1fr 1fr;">
+    <div class="fm-panel">
+      <h2>Notifications</h2>
+      <div class="fm-toggle-row">
+        <div><div class="fm-toggle-title">Email Notifications</div><div class="fm-toggle-sub">Receive updates via email</div></div>
+        <button class="fm-switch" data-key="email"></button>
+      </div>
+      <div class="fm-toggle-row">
+        <div><div class="fm-toggle-title">SMS Notifications</div><div class="fm-toggle-sub">Receive updates via SMS</div></div>
+        <button class="fm-switch" data-key="sms"></button>
+      </div>
+      <div class="fm-toggle-row">
+        <div><div class="fm-toggle-title">Push Notifications</div><div class="fm-toggle-sub">Terima notifikasi aplikasi</div></div>
+        <button class="fm-switch" data-key="push"></button>
+      </div>
+    </div>
+
+    <div class="fm-panel">
+      <h2>Security</h2>
+      <div class="fm-toggle-row">
+        <div><div class="fm-toggle-title">Two-Factor Authentication</div><div class="fm-toggle-sub">Add an extra layer of security</div></div>
+        <button class="fm-switch" id="fm-2fa"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="fm-panel" style="margin-top:20px;">
+    <h2>Payment Details</h2>
+    <div class="fm-form-grid">
+      <div class="fm-field"><label>Bank Name</label><input class="fm-input" id="fm-bank-name"></div>
+      <div class="fm-field"><label>Account Number</label><input class="fm-input" id="fm-bank-acc"></div>
+    </div>
+    <button class="fm-btn" id="fm-save-settings">Save Settings</button>
+  </div>
+
+<script src="store.js"></script>
+<script src="sidebar.js"></script>
+<script>
+  renderChrome("settings");
+  const s = Store.get().settings;
+  let notif = { ...s.notifications };
+  let twoFA = s.twoFA;
+
+  function renderSwitches() {
+    document.querySelectorAll(".fm-switch[data-key]").forEach(btn => {
+      btn.classList.toggle("on", notif[btn.dataset.key]);
+    });
+    document.getElementById("fm-2fa").classList.toggle("on", twoFA);
+  }
+  document.querySelectorAll(".fm-switch[data-key]").forEach(btn => {
+    btn.addEventListener("click", () => { notif[btn.dataset.key] = !notif[btn.dataset.key]; renderSwitches(); });
+  });
+  document.getElementById("fm-2fa").addEventListener("click", () => { twoFA = !twoFA; renderSwitches(); });
+
+  document.getElementById("fm-bank-name").value = s.bank.bankName;
+  document.getElementById("fm-bank-acc").value = s.bank.accountNo;
+  renderSwitches();
+
+  document.getElementById("fm-save-settings").addEventListener("click", () => {
+    Store.update(d => {
+      d.settings.notifications = notif;
+      d.settings.twoFA = twoFA;
+      d.settings.bank.bankName = document.getElementById("fm-bank-name").value.trim();
+      d.settings.bank.accountNo = document.getElementById("fm-bank-acc").value.trim();
+    });
+    toast("Settings saved!");
+  });
+</script>
+</body>
+</html>
