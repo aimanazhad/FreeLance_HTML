@@ -68,3 +68,9 @@ applyBtn.addEventListener("click", function () {
     });
 
 });
+
+document.querySelectorAll(".apply-job-btn").forEach(button => {
+    button.addEventListener("click", function () {
+        alert("Application submitted successfully!");
+    });
+});

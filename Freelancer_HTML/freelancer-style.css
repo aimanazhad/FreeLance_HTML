@@ -465,6 +465,19 @@ body.freelancer-dashboard-body {
   color: var(--theme-primary-hover);
 }
 
+.job-filter-box{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    margin-top:20px;
+}
+
+.filter-group{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
 .filter-group label{
     font-size:14px;
     font-weight:600;
@@ -499,5 +512,23 @@ body.freelancer-dashboard-body {
 }
 
 .apply-filter-btn:hover{
+    background:#564ce0;
+}
+
+/* Apply Job Button */
+.apply-job-btn{
+    margin-top:10px;
+    padding:8px 16px;
+    background:#6c63ff;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.apply-job-btn:hover{
     background:#564ce0;
 }
