@@ -4,28 +4,115 @@
 // ============================================
 
 $host = 'localhost';
-$dbname = 'freelancer_db';  // Nama database yang awak buat
+$dbname = 'freelancer_db';
 $username = 'root';
-$password = '';  // Default Laragon = kosong
+$password = '';
 
 // ============================================
 // PDO CONNECTION WITH ERROR HANDLING
 // ============================================
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    
-    // Set PDO error mode to exception
+    $pdo = new PDO("mysql:host=$host;charset=utf8mb4", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Set default fetch mode to associative array
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-    
-    // Set charset to UTF-8
     $pdo->exec("SET NAMES utf8mb4");
-    
+
+    // Create database if it does not exist
+    $pdo->exec("CREATE DATABASE IF NOT EXISTS `$dbname` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+
+    // Reconnect to the target database
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    $pdo->exec("SET NAMES utf8mb4");
+
+    // Create required tables if they do not exist
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(150) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'client',
+        phone VARCHAR(30) DEFAULT NULL,
+        bio TEXT DEFAULT NULL,
+        skills TEXT DEFAULT NULL,
+        notifications VARCHAR(20) DEFAULT 'on',
+        status VARCHAR(20) DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS jobs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        client_id INT NOT NULL,
+        title VARCHAR(150) NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        description TEXT NOT NULL,
+        budget_min DECIMAL(10,2) DEFAULT 0,
+        budget_max DECIMAL(10,2) DEFAULT 0,
+        project_type VARCHAR(50) DEFAULT NULL,
+        location_type VARCHAR(50) DEFAULT NULL,
+        deadline DATE DEFAULT NULL,
+        skills TEXT DEFAULT NULL,
+        status VARCHAR(20) DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS applications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        job_id INT NOT NULL,
+        freelancer_id INT NOT NULL,
+        status VARCHAR(30) DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        sender_id INT NOT NULL,
+        receiver_id INT NOT NULL,
+        job_id INT DEFAULT NULL,
+        message TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS payments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        job_id INT DEFAULT NULL,
+        amount DECIMAL(10,2) DEFAULT 0,
+        method VARCHAR(50) DEFAULT NULL,
+        description TEXT DEFAULT NULL,
+        status VARCHAR(20) DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS portfolio (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        freelancer_id INT NOT NULL,
+        title VARCHAR(150) NOT NULL,
+        description TEXT DEFAULT NULL,
+        image_url VARCHAR(255) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS reviews (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        reviewer_id INT NOT NULL,
+        reviewee_id INT NOT NULL,
+        job_id INT DEFAULT NULL,
+        rating INT DEFAULT 0,
+        comment TEXT DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS saved_freelancers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        client_id INT NOT NULL,
+        freelancer_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
 } catch(PDOException $e) {
-    // If connection fails, show error and stop execution
     die("❌ Connection failed: " . $e->getMessage());
 }
 

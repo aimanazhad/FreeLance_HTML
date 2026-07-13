@@ -1,3 +1,53 @@
+<?php
+require_once 'config.php';
+
+// ============================================
+// SIGNUP PROCESS
+// ============================================
+$error = '';
+$success = '';
+
+if (isset($_POST['signup'])) {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+    $confirm_password = trim($_POST['confirm_password']);
+    $role = $_POST['role'] ?? 'client';
+    
+    // Validation
+    if (empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
+        $error = "⚠️ Please fill in all fields.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "⚠️ Please enter a valid email address.";
+    } elseif ($password !== $confirm_password) {
+        $error = "⚠️ Passwords do not match!";
+    } elseif (strlen($password) < 6) {
+        $error = "⚠️ Password must be at least 6 characters.";
+    } else {
+        // Check if email already exists
+        $check = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+        $check->execute([$email]);
+        
+        if ($check->rowCount() > 0) {
+            $error = "⚠️ Email already registered! Please login.";
+        } else {
+            // Hash password
+            $hashed_password = md5($password);
+            
+            // Insert into database
+            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
+            if ($stmt->execute([$name, $email, $hashed_password, $role])) {
+                // ✅ REDIRECT KE LOGIN PAGE
+                header('Location: index.php?signup=success');
+                exit();
+            } else {
+                $error = "❌ Failed to create account. Please try again.";
+            }
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +56,31 @@
     <title>Freelance Marketplace - Create Profile</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .message {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .message.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        .message.success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        .message i {
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
 
@@ -41,27 +116,31 @@
                 <p>Connect with a world of opportunity for UiTM student</p>
             </header>
 
-            <form id="profileForm" action="index.php" method="post">
+            <?php if ($error): ?>
+                <div class="message error">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <?php echo $error; ?>
+                </div>
+            <?php endif; ?>
+
+            <form id="profileForm" method="POST" action="">
                 <input type="hidden" name="signup" value="1">
-                <input type="hidden" id="signupNameField" name="name">
-                <input type="hidden" id="signupEmailField" name="email">
-                <input type="hidden" id="signupPasswordField" name="password">
-                <input type="hidden" id="signupRoleField" name="role" value="client">
+                
                 <div class="input-group">
                     <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" name="fullName" placeholder="Your full name" required>
+                    <input type="text" id="fullName" name="name" placeholder="Your full name" required>
                 </div>
 
                 <div class="input-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="emailInput" placeholder="your.email@example.com" required>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
                 </div>
 
                 <div class="input-group">
                     <label for="password">Password</label>
                     <div class="password-wrapper">
                         <i class="fa-solid fa-lock input-icon"></i>
-                        <input type="password" id="password" name="passwordInput" placeholder="••••••••••••••••" required>
+                        <input type="password" id="password" name="password" placeholder="••••••••••••••••" required>
                         <button type="button" class="toggle-password">
                             <i class="fa-regular fa-eye-slash"></i> Show
                         </button>
@@ -72,12 +151,14 @@
                     <label for="confirmPassword">Confirm Password</label>
                     <div class="password-wrapper">
                         <i class="fa-solid fa-lock input-icon"></i>
-                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••••••••••" required>
+                        <input type="password" id="confirmPassword" name="confirm_password" placeholder="••••••••••••••••" required>
                         <button type="button" class="toggle-password">
                             <i class="fa-regular fa-eye-slash"></i> Show
                         </button>
                     </div>
                 </div>
+
+                <input type="hidden" id="signupRole" name="role" value="client">
 
                 <button type="submit" class="btn-submit">Sign Up</button>
             </form>
@@ -97,11 +178,14 @@
             </button>
 
             <p class="login-redirect">
-                Already have an account? <a href="index.html">Login</a>
+                Already have an account? <a href="index.php">Login</a>
             </p>
         </section>
     </main>
 
+    <!-- ==========================================
+    ROLE MODAL
+    ========================================== -->
     <div id="roleModal" class="modal-overlay">
         <div class="modal-box">
             <button class="modal-close" onclick="closeRoleModal()">✕</button>
@@ -140,8 +224,8 @@
                 return;
             }
             
-            if (password.length < 8) {
-                alert('Password must be at least 8 characters long!');
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters long!');
                 return;
             }
             
@@ -159,10 +243,7 @@
         function submitRoleSelection() {
             const selected = document.querySelector('input[name="userRole"]:checked');
             if (selected) {
-                document.getElementById('signupNameField').value = document.getElementById('fullName').value.trim();
-                document.getElementById('signupEmailField').value = document.getElementById('email').value.trim();
-                document.getElementById('signupPasswordField').value = document.getElementById('password').value;
-                document.getElementById('signupRoleField').value = selected.value;
+                document.getElementById('signupRole').value = selected.value;
                 closeRoleModal();
                 document.getElementById('profileForm').submit();
             } else {
@@ -170,7 +251,6 @@
             }
         }
 
-        // Toggle password visibility for all password fields
         document.querySelectorAll('.toggle-password').forEach(btn => {
             btn.addEventListener('click', function() {
                 const input = this.closest('.password-wrapper').querySelector('input');
@@ -188,5 +268,6 @@
             });
         });
     </script>
+
 </body>
 </html>
