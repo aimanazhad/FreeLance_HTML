@@ -52,12 +52,12 @@
       </header>
       <section class="welcome-text-section">
         <span class="welcome-tag">Welcome back,</span>
-        <h1 class="welcome-heading">Taylor Sweety! 👋</h1>
+        <h1 class="welcome-heading">Payment Center 👋</h1>
       </section>
       <section class="workspace-panel-card">
         <div class="panel-header-row">
           <h3 class="panel-title-text">Payment Overview</h3>
-          <p class="panel-subtitle-text">Manage your invoices and payment history.</p>
+          <p class="panel-subtitle-text">Review your completed work, pending payouts, and payment history.</p>
         </div>
         <div class="metrics-summary-grid">
           <div class="metric-card-item">
@@ -65,13 +65,15 @@
             <div class="metric-info-data">
               <span class="metric-label">Total Paid</span>
               <h2 class="metric-number">RM1,240</h2>
+              <span class="metric-subtext">Completed payouts</span>
             </div>
           </div>
           <div class="metric-card-item">
             <div class="metric-icon-box icon-blue"><i class="fa-solid fa-clock"></i></div>
             <div class="metric-info-data">
-              <span class="metric-label">Pending</span>
+              <span class="metric-label">Pending Release</span>
               <h2 class="metric-number">RM240</h2>
+              <span class="metric-subtext">Waiting for approval</span>
             </div>
           </div>
           <div class="metric-card-item">
@@ -79,6 +81,113 @@
             <div class="metric-info-data">
               <span class="metric-label">Next Payment</span>
               <h2 class="metric-number">23 Jun 2026</h2>
+              <span class="metric-subtext">Milestone due soon</span>
+            </div>
+          </div>
+          <div class="metric-card-item">
+            <div class="metric-icon-box icon-orange"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+            <div class="metric-info-data">
+              <span class="metric-label">Invoices</span>
+              <h2 class="metric-number">4</h2>
+              <span class="metric-subtext">Open and paid</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace-split-layout payment-flow-layout">
+        <div class="workspace-panel-card payment-main-card">
+          <div class="panel-header-row compact-row">
+            <h3 class="panel-title-text">Release Payment</h3>
+            <p class="panel-subtitle-text">Pay the freelancer after the work is completed and approved.</p>
+          </div>
+
+          <div class="payment-project-card">
+            <div class="payment-project-top">
+              <span class="payment-project-badge">Completed</span>
+              <span class="payment-status-pill status-success">Approved</span>
+            </div>
+            <h4 class="payment-project-title">E-commerce Website Redesign</h4>
+            <p class="payment-project-subtext">Freelancer: Aina Rahman • Completed on 10 Jun 2026</p>
+
+            <div class="payment-meta-row compact-meta">
+              <div class="payment-meta-box">
+                <span class="payment-meta-label">Milestone</span>
+                <strong>Final delivery</strong>
+              </div>
+              <div class="payment-meta-box">
+                <span class="payment-meta-label">Amount</span>
+                <strong>RM240</strong>
+              </div>
+            </div>
+
+            <div class="payment-actions">
+              <button class="primary-payment-btn">Pay Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="workspace-panel-card payment-side-card">
+          <div class="panel-header-row compact-row">
+            <h3 class="panel-title-text">Payment Details</h3>
+            <p class="panel-subtitle-text">Simple payout information.</p>
+          </div>
+
+          <div class="payment-method-card">
+            <div class="payment-method-item">
+              <div>
+                <strong>Bank Transfer</strong>
+                <p>Maybank • 1234 5678 9012</p>
+              </div>
+              <span class="payment-status-pill status-info">Default</span>
+            </div>
+            <div class="payment-method-item no-border">
+              <div>
+                <strong>Note</strong>
+                <p>Payment will be released after final confirmation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace-panel-card payment-history-panel">
+        <div class="panel-header-row">
+          <h3 class="panel-title-text">Recent Payment History</h3>
+          <p class="panel-subtitle-text">Track previous milestone payments and invoices here.</p>
+        </div>
+
+        <div class="payment-history-list">
+          <div class="payment-history-item">
+            <div>
+              <h4>Logo & Branding Package</h4>
+              <p>Invoice #INV-1024 • 12 Jun 2026</p>
+            </div>
+            <div class="payment-history-right">
+              <span class="payment-status-pill status-success">Paid</span>
+              <strong>RM650</strong>
+            </div>
+          </div>
+
+          <div class="payment-history-item">
+            <div>
+              <h4>Admin Dashboard UI</h4>
+              <p>Invoice #INV-1018 • 02 Jun 2026</p>
+            </div>
+            <div class="payment-history-right">
+              <span class="payment-status-pill status-success">Paid</span>
+              <strong>RM390</strong>
+            </div>
+          </div>
+
+          <div class="payment-history-item">
+            <div>
+              <h4>Mobile App Prototype</h4>
+              <p>Invoice #INV-1009 • 20 May 2026</p>
+            </div>
+            <div class="payment-history-right">
+              <span class="payment-status-pill status-pending">Pending</span>
+              <strong>RM200</strong>
             </div>
           </div>
         </div>
