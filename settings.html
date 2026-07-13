@@ -39,12 +39,9 @@
   </div>
 
   <div class="fm-panel" style="margin-top:20px;">
-    <h2>Payment Details</h2>
-    <div class="fm-form-grid">
-      <div class="fm-field"><label>Bank Name</label><input class="fm-input" id="fm-bank-name"></div>
-      <div class="fm-field"><label>Account Number</label><input class="fm-input" id="fm-bank-acc"></div>
-    </div>
-    <button class="fm-btn" id="fm-save-settings">Save Settings</button>
+    <h2>Account</h2>
+    <p style="margin:0 0 16px; color:#64748b;">Use the button below to sign out from this workspace.</p>
+    <button class="fm-btn" id="fm-logout-btn" type="button" style="background:#ef4444; color:#fff; border-color:#ef4444;">Log Out</button>
   </div>
 
 <script src="store.js"></script>
@@ -66,18 +63,10 @@
   });
   document.getElementById("fm-2fa").addEventListener("click", () => { twoFA = !twoFA; renderSwitches(); });
 
-  document.getElementById("fm-bank-name").value = s.bank.bankName;
-  document.getElementById("fm-bank-acc").value = s.bank.accountNo;
   renderSwitches();
 
-  document.getElementById("fm-save-settings").addEventListener("click", () => {
-    Store.update(d => {
-      d.settings.notifications = notif;
-      d.settings.twoFA = twoFA;
-      d.settings.bank.bankName = document.getElementById("fm-bank-name").value.trim();
-      d.settings.bank.accountNo = document.getElementById("fm-bank-acc").value.trim();
-    });
-    toast("Settings saved!");
+  document.getElementById("fm-logout-btn").addEventListener("click", () => {
+    window.location.href = "index.html";
   });
 </script>
 </body>

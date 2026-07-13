@@ -26,6 +26,11 @@
     </div>
     <div class="fm-field"><label>Bio</label><textarea id="fm-bio" rows="3"></textarea></div>
     <div class="fm-field">
+      <label>E-Wallet QR</label>
+      <input class="fm-input" id="fm-wallet-qr" placeholder="Enter QR image URL or payment link">
+      <small style="color:var(--muted);font-size:12px;">Clients can use this QR or link to pay you.</small>
+    </div>
+    <div class="fm-field">
       <label>Skills</label>
       <div id="fm-skills-list" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"></div>
       <div style="display:flex;gap:8px;">
@@ -49,6 +54,7 @@
     document.getElementById("fm-name").value = p.name;
     document.getElementById("fm-email").value = p.email;
     document.getElementById("fm-bio").value = p.bio;
+    document.getElementById("fm-wallet-qr").value = p.walletQr || "";
     skills = [...p.skills];
     renderSkills();
   }
@@ -76,6 +82,7 @@
       d.profile.name = document.getElementById("fm-name").value.trim() || d.profile.name;
       d.profile.email = document.getElementById("fm-email").value.trim();
       d.profile.bio = document.getElementById("fm-bio").value.trim();
+      d.profile.walletQr = document.getElementById("fm-wallet-qr").value.trim();
       d.profile.skills = skills;
     });
     toast("Profile saved!");
