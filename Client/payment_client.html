@@ -95,57 +95,66 @@
         </div>
       </section>
 
-      <section class="workspace-split-layout payment-flow-layout">
-        <div class="workspace-panel-card payment-main-card">
-          <div class="panel-header-row compact-row">
-            <h3 class="panel-title-text">Release Payment</h3>
-            <p class="panel-subtitle-text">Pay the freelancer after the work is completed and approved.</p>
-          </div>
-
-          <div class="payment-project-card">
-            <div class="payment-project-top">
-              <span class="payment-project-badge">Completed</span>
-              <span class="payment-status-pill status-success">Approved</span>
-            </div>
-            <h4 class="payment-project-title">E-commerce Website Redesign</h4>
-            <p class="payment-project-subtext">Freelancer: Aina Rahman • Completed on 10 Jun 2026</p>
-
-            <div class="payment-meta-row compact-meta">
-              <div class="payment-meta-box">
-                <span class="payment-meta-label">Milestone</span>
-                <strong>Final delivery</strong>
-              </div>
-              <div class="payment-meta-box">
-                <span class="payment-meta-label">Amount</span>
-                <strong>RM240</strong>
-              </div>
-            </div>
-
-            <div class="payment-actions">
-              <button class="primary-payment-btn">Pay Now</button>
-            </div>
-          </div>
+      <section class="workspace-panel-card payment-list-panel">
+        <div class="panel-header-row compact-row">
+          <h3 class="panel-title-text">Freelancers to Pay</h3>
+          <p class="panel-subtitle-text">These freelancers are ready to be paid after completing their tasks.</p>
         </div>
 
-        <div class="workspace-panel-card payment-side-card">
-          <div class="panel-header-row compact-row">
-            <h3 class="panel-title-text">Payment Details</h3>
-            <p class="panel-subtitle-text">Simple payout information.</p>
+        <div class="payment-list">
+          <div class="payment-method-box">
+            <div class="payment-method-title">Payment Method</div>
+            <div class="payment-method-options">
+              <span class="method-chip active">E-Wallet</span>
+            </div>
+            <div class="wallet-preview">
+              <div class="wallet-qr">QR</div>
+              <div>
+                <h4>Scan to Pay</h4>
+                <p>Use your e-wallet app to pay the freelancer directly.</p>
+              </div>
+            </div>
           </div>
 
-          <div class="payment-method-card">
-            <div class="payment-method-item">
+          <div class="payment-list-item">
+            <div class="payment-user-info">
+              <div class="payment-avatar">AR</div>
               <div>
-                <strong>Bank Transfer</strong>
-                <p>Maybank • 1234 5678 9012</p>
+                <h4>Aina Rahman</h4>
+                <p>Completed: E-commerce Website Redesign</p>
               </div>
-              <span class="payment-status-pill status-info">Default</span>
             </div>
-            <div class="payment-method-item no-border">
+            <div class="payment-item-meta">
+              <span class="payment-amount">RM240</span>
+              <button class="primary-payment-btn pay-now-btn" data-name="Aina Rahman" data-amount="RM240">Paid</button>
+            </div>
+          </div>
+
+          <div class="payment-list-item">
+            <div class="payment-user-info">
+              <div class="payment-avatar">MS</div>
               <div>
-                <strong>Note</strong>
-                <p>Payment will be released after final confirmation.</p>
+                <h4>Mohamed Shah</h4>
+                <p>Completed: Mobile App Prototype</p>
               </div>
+            </div>
+            <div class="payment-item-meta">
+              <span class="payment-amount">RM180</span>
+              <button class="primary-payment-btn pay-now-btn" data-name="Mohamed Shah" data-amount="RM180">Paid</button>
+            </div>
+          </div>
+
+          <div class="payment-list-item">
+            <div class="payment-user-info">
+              <div class="payment-avatar">NZ</div>
+              <div>
+                <h4>Nadia Zain</h4>
+                <p>Completed: Branding & Social Assets</p>
+              </div>
+            </div>
+            <div class="payment-item-meta">
+              <span class="payment-amount">RM320</span>
+              <button class="primary-payment-btn pay-now-btn" data-name="Nadia Zain" data-amount="RM320">Paid</button>
             </div>
           </div>
         </div>
@@ -194,6 +203,72 @@
       </section>
     </main>
   </div>
+
+  <div class="payment-modal" id="paymentModal" aria-hidden="true">
+    <div class="payment-modal-card">
+      <div class="payment-modal-header">
+        <h3>Choose Payment Method</h3>
+        <button class="modal-close" id="closeModal">×</button>
+      </div>
+      <p class="payment-modal-subtext" id="paymentModalText">Pay the freelancer using your preferred method.</p>
+      <div class="payment-method-options modal-options">
+        <button class="method-chip active" data-method="E-Wallet">E-Wallet</button>
+      </div>
+      <div class="wallet-preview modal-wallet-preview">
+        <div class="wallet-qr">QR</div>
+        <div>
+          <h4>Scan QR from freelancer</h4>
+          <p>Open your e-wallet app and scan the freelancer's QR code to complete the payment.</p>
+        </div>
+      </div>
+      <div class="payment-actions modal-actions">
+        <button class="secondary-payment-btn" id="cancelModal">Cancel</button>
+        <button class="primary-payment-btn" id="confirmPayment">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('paymentModal');
+    const closeBtn = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancelModal');
+    const confirmBtn = document.getElementById('confirmPayment');
+    const modalText = document.getElementById('paymentModalText');
+    const methodButtons = document.querySelectorAll('.modal-options .method-chip');
+    let selectedMethod = 'Bank Transfer';
+
+    document.querySelectorAll('.pay-now-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        modalText.textContent = `${btn.dataset.name} • ${btn.dataset.amount}`;
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+      });
+    });
+
+    function closeModal() {
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    methodButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        methodButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedMethod = btn.dataset.method;
+      });
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      alert(`Payment confirmed via ${selectedMethod}.`);
+      closeModal();
+    });
+  </script>
 </body>
 </html>
 
