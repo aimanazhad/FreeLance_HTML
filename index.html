@@ -48,14 +48,16 @@
             <p class="muted">Use your email and password to enter the Freelance Marketplace.</p>
           </div>
 
-          <form class="login-form" id="mainLoginForm">
+          <form class="login-form" id="mainLoginForm" action="index.php" method="post">
+            <input type="hidden" name="login" value="1" />
+            <input type="hidden" id="selectedRoleInput" name="role" value="freelancer" />
             <label>
               Email
-              <input type="email" placeholder="you@example.com" required />
+              <input type="email" name="email" placeholder="you@example.com" required />
             </label>
             <label>
               Password
-              <input id="passwordInput" type="password" placeholder="Enter your password" required />
+              <input id="passwordInput" name="password" type="password" placeholder="Enter your password" required />
             </label>
 
             <div class="row-between">
@@ -131,16 +133,10 @@
 
       // 3. Proses pilihan apabila butang DONE ditekan
       doneModalBtn?.addEventListener('click', () => {
-        const selectedRole = document.querySelector('input[name="userRole"]:checked')?.value;
+        const selectedRole = document.querySelector('input[name="userRole"]:checked')?.value || 'freelancer';
+        document.getElementById('selectedRoleInput').value = selectedRole;
         roleModalOverlay.classList.remove('active');
-
-        if (selectedRole === 'freelancer') {
-          window.location.href = 'dashboard_freelancer.html';
-        } else if (selectedRole === 'client') {
-          window.location.href = 'Client/dashboard_client.html';
-        } else {
-          window.location.href = 'Client/dashboard_client.html';
-        }
+        loginForm?.submit();
       });
 
       // 4. Tutup modal secara alternatif sekiranya kawasan gelap luar kotak ditekan

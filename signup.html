@@ -41,22 +41,27 @@
                 <p>Connect with a world of opportunity for UiTM student</p>
             </header>
 
-            <form id="profileForm">
+            <form id="profileForm" action="index.php" method="post">
+                <input type="hidden" name="signup" value="1">
+                <input type="hidden" id="signupNameField" name="name">
+                <input type="hidden" id="signupEmailField" name="email">
+                <input type="hidden" id="signupPasswordField" name="password">
+                <input type="hidden" id="signupRoleField" name="role" value="client">
                 <div class="input-group">
                     <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" placeholder="Your full name" required>
+                    <input type="text" id="fullName" name="fullName" placeholder="Your full name" required>
                 </div>
 
                 <div class="input-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" placeholder="your.email@example.com" required>
+                    <input type="email" id="email" name="emailInput" placeholder="your.email@example.com" required>
                 </div>
 
                 <div class="input-group">
                     <label for="password">Password</label>
                     <div class="password-wrapper">
                         <i class="fa-solid fa-lock input-icon"></i>
-                        <input type="password" id="password" placeholder="••••••••••••••••" required>
+                        <input type="password" id="password" name="passwordInput" placeholder="••••••••••••••••" required>
                         <button type="button" class="toggle-password">
                             <i class="fa-regular fa-eye-slash"></i> Show
                         </button>
@@ -67,7 +72,7 @@
                     <label for="confirmPassword">Confirm Password</label>
                     <div class="password-wrapper">
                         <i class="fa-solid fa-lock input-icon"></i>
-                        <input type="password" id="confirmPassword" placeholder="••••••••••••••••" required>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••••••••••" required>
                         <button type="button" class="toggle-password">
                             <i class="fa-regular fa-eye-slash"></i> Show
                         </button>
@@ -154,13 +159,12 @@
         function submitRoleSelection() {
             const selected = document.querySelector('input[name="userRole"]:checked');
             if (selected) {
+                document.getElementById('signupNameField').value = document.getElementById('fullName').value.trim();
+                document.getElementById('signupEmailField').value = document.getElementById('email').value.trim();
+                document.getElementById('signupPasswordField').value = document.getElementById('password').value;
+                document.getElementById('signupRoleField').value = selected.value;
                 closeRoleModal();
-                // Redirect based on role selection
-                if (selected.value === 'freelancer') {
-                    window.location.href = 'dashboard_freelancer.html';
-                } else if (selected.value === 'client') {
-                    window.location.href = 'Client/dashboard_client.html';
-                }
+                document.getElementById('profileForm').submit();
             } else {
                 alert('Please select a role.');
             }
