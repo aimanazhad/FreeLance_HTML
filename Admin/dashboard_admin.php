@@ -38,6 +38,25 @@ $activities = $pdo->query("
 function getPercentage($value, $total) {
     return $total > 0 ? round(($value / $total) * 100) : 0;
 }
+
+// Calculate month-over-month growth trend for a given table/condition
+function getMonthlyTrend($pdo, $table, $extraWhere = '') {
+    $where = $extraWhere !== '' ? "AND $extraWhere" : '';
+    $thisMonth = $pdo->query("SELECT COUNT(*) FROM $table WHERE created_at >= DATE_FORMAT(NOW(), '%Y-%m-01') $where")->fetchColumn();
+    $lastMonth = $pdo->query("SELECT COUNT(*) FROM $table WHERE created_at >= DATE_FORMAT(NOW() - INTERVAL 1 MONTH, '%Y-%m-01') AND created_at < DATE_FORMAT(NOW(), '%Y-%m-01') $where")->fetchColumn();
+
+    if ($lastMonth == 0) {
+        $percent = $thisMonth > 0 ? 100 : 0;
+    } else {
+        $percent = round((($thisMonth - $lastMonth) / $lastMonth) * 100);
+    }
+    return ['percent' => $percent, 'up' => $percent >= 0];
+}
+
+$usersTrend = getMonthlyTrend($pdo, 'users');
+$freelancersTrend = getMonthlyTrend($pdo, 'users', "role = 'freelancer'");
+$clientsTrend = getMonthlyTrend($pdo, 'users', "role = 'client'");
+$jobsTrend = getMonthlyTrend($pdo, 'jobs');
 ?>
 
 <!DOCTYPE html>
@@ -394,8 +413,8 @@ function getPercentage($value, $total) {
                     <div class="stat-info">
                         <div class="stat-label">Total Users</div>
                         <div class="stat-number"><?php echo $totalUsers; ?></div>
-                        <div class="stat-trend">
-                            <i class="fa-solid fa-arrow-up"></i> 12% <span class="period">from last month</span>
+                        <div class="stat-trend" style="color: <?php echo $usersTrend['up'] ? '#22c55e' : '#ef4444'; ?>">
+                            <i class="fa-solid fa-arrow-<?php echo $usersTrend['up'] ? 'up' : 'down'; ?>"></i> <?php echo abs($usersTrend['percent']); ?>% <span class="period">from last month</span>
                         </div>
                     </div>
                     <div class="stat-icon icon-users">
@@ -408,8 +427,8 @@ function getPercentage($value, $total) {
                     <div class="stat-info">
                         <div class="stat-label">Total Freelancers</div>
                         <div class="stat-number"><?php echo $totalFreelancers; ?></div>
-                        <div class="stat-trend">
-                            <i class="fa-solid fa-arrow-up"></i> 15% <span class="period">from last month</span>
+                        <div class="stat-trend" style="color: <?php echo $freelancersTrend['up'] ? '#22c55e' : '#ef4444'; ?>">
+                            <i class="fa-solid fa-arrow-<?php echo $freelancersTrend['up'] ? 'up' : 'down'; ?>"></i> <?php echo abs($freelancersTrend['percent']); ?>% <span class="period">from last month</span>
                         </div>
                     </div>
                     <div class="stat-icon icon-freelancers">
@@ -422,8 +441,8 @@ function getPercentage($value, $total) {
                     <div class="stat-info">
                         <div class="stat-label">Total Clients</div>
                         <div class="stat-number"><?php echo $totalClients; ?></div>
-                        <div class="stat-trend">
-                            <i class="fa-solid fa-arrow-up"></i> 8% <span class="period">from last month</span>
+                        <div class="stat-trend" style="color: <?php echo $clientsTrend['up'] ? '#22c55e' : '#ef4444'; ?>">
+                            <i class="fa-solid fa-arrow-<?php echo $clientsTrend['up'] ? 'up' : 'down'; ?>"></i> <?php echo abs($clientsTrend['percent']); ?>% <span class="period">from last month</span>
                         </div>
                     </div>
                     <div class="stat-icon icon-clients">
@@ -436,8 +455,8 @@ function getPercentage($value, $total) {
                     <div class="stat-info">
                         <div class="stat-label">Total Jobs Posted</div>
                         <div class="stat-number"><?php echo $totalJobs; ?></div>
-                        <div class="stat-trend">
-                            <i class="fa-solid fa-arrow-up"></i> 10% <span class="period">from last month</span>
+                        <div class="stat-trend" style="color: <?php echo $jobsTrend['up'] ? '#22c55e' : '#ef4444'; ?>">
+                            <i class="fa-solid fa-arrow-<?php echo $jobsTrend['up'] ? 'up' : 'down'; ?>"></i> <?php echo abs($jobsTrend['percent']); ?>% <span class="period">from last month</span>
                         </div>
                     </div>
                     <div class="stat-icon icon-jobs">
@@ -457,7 +476,7 @@ function getPercentage($value, $total) {
                 <div class="workspace-card">
                     <div class="card-header">
                         <h3>Recent Activities</h3>
-                        <a href="#">View All</a>
+                        <a href="activity_log.php">View All</a>
                     </div>
 
                     <?php foreach ($activities as $activity): ?>

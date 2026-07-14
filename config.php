@@ -42,21 +42,43 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
-    $pdo->exec("CREATE TABLE IF NOT EXISTS jobs (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        client_id INT NOT NULL,
-        title VARCHAR(150) NOT NULL,
-        category VARCHAR(100) NOT NULL,
-        description TEXT NOT NULL,
-        budget_min DECIMAL(10,2) DEFAULT 0,
-        budget_max DECIMAL(10,2) DEFAULT 0,
-        project_type VARCHAR(50) DEFAULT NULL,
-        location_type VARCHAR(50) DEFAULT NULL,
-        deadline DATE DEFAULT NULL,
-        skills TEXT DEFAULT NULL,
-        status VARCHAR(20) DEFAULT 'active',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )");
+    $pdo->exec("
+CREATE TABLE IF NOT EXISTS jobs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    client_id INT NOT NULL,
+
+    title VARCHAR(150) NOT NULL,
+
+    category VARCHAR(100) NOT NULL,
+
+    description TEXT NOT NULL,
+
+    budget_min DECIMAL(10,2) DEFAULT 0.00,
+
+    budget_max DECIMAL(10,2) DEFAULT 0.00,
+
+    project_type VARCHAR(50) DEFAULT NULL,
+
+    location_type VARCHAR(50) DEFAULT NULL,
+
+    deadline DATE DEFAULT NULL,
+
+    skills TEXT DEFAULT NULL,
+
+    status ENUM('active','completed','cancelled') DEFAULT 'active',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX (client_id)
+
+    ) ENGINE=InnoDB
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_unicode_ci;
+    ");
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS applications (
         id INT AUTO_INCREMENT PRIMARY KEY,
