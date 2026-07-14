@@ -104,8 +104,8 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                 <a href="portfolio.php" class="menu-item"><i class="fa-solid fa-folder-open"></i> Portfolio</a>
                 <a href="earnings.php" class="menu-item"><i class="fa-solid fa-wallet"></i> Earnings</a>
                 <a href="profile.php" class="menu-item"><i class="fa-solid fa-user"></i> Profile</a>
-                <a href="settings.php" class="menu-item"><i class="fa-solid fa-gear"></i> Settings</a>
-                <a href="../index.php?logout=1" class="menu-item" style="margin-top: 20px; border-top: 1px solid var(--color-border-line); padding-top: 16px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                <a href="settings_freelancer.php" class="menu-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="index.php?logout=1" class="menu-item" style="margin-top: 20px; border-top: 1px solid var(--color-border-line); padding-top: 16px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
             </nav>
         </aside>
         <main class="main-content">

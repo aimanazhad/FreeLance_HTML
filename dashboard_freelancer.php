@@ -2,7 +2,7 @@
 require_once 'config.php';
 
 if (!isLoggedIn() || !isFreelancer()) {
-    redirect('../index.php');
+    redirect('index.php');
 }
 
 $user_id = $_SESSION['user_id'];
@@ -14,7 +14,7 @@ $inProgress = $pdo->query("SELECT COUNT(*) FROM applications WHERE freelancer_id
 $totalEarnings = $pdo->query("SELECT SUM(amount) FROM payments WHERE user_id = $user_id AND status = 'paid'")->fetchColumn() ?? 0;
 
 // Get recommended jobs
-$recommendedJobs = $pdo->query("SELECT * FROM jobs WHERE status = 'active' ORDER BY created_at DESC LIMIT 3")->fetchAll();
+$recommendedJobs = $pdo->query("SELECT * FROM jobs WHERE status = 'active' ORDER BY created_at DESC LIMIT 4")->fetchAll();
 
 // Get applications status
 $applications = $pdo->query("
@@ -49,8 +49,133 @@ $applications = $pdo->query("
         }
 
         body {
-            background: #f1f5f9;
+            background: #f3f0ff;
             min-height: 100vh;
+        }
+
+        /* ============================================
+           APP SHELL + SIDEBAR
+        ============================================ */
+        .app-shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            padding: 28px 18px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            padding: 0 4px;
+        }
+
+        .sidebar .brand .logo {
+            font-weight: 800;
+            color: #1f2937;
+            font-size: 18px;
+        }
+
+        .sidebar .brand .logo i {
+            color: #6366f1;
+        }
+
+        .sidebar .brand .sub {
+            font-size: 12px;
+            color: #6b7280;
+            display: block;
+            margin-top: -2px;
+        }
+
+        .sidebar .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .sidebar .menu a {
+            text-decoration: none;
+            color: #6b7280;
+            font-weight: 500;
+            padding: 10px 14px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar .menu a i {
+            width: 20px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .sidebar .menu a:hover {
+            background: #f5f3ff;
+            color: #6366f1;
+        }
+
+        .sidebar .menu a:hover i {
+            color: #6366f1;
+        }
+
+        .sidebar .menu a.active {
+            background: #eef2ff;
+            color: #6366f1;
+            font-weight: 600;
+        }
+
+        .sidebar .menu a.active i {
+            color: #6366f1;
+        }
+
+        .sidebar .logout {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ef4444;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .sidebar .logout i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar .logout:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        /* ============================================
+           CONTENT
+        ============================================ */
+        .content {
+            flex: 1;
+            min-width: 0;
         }
 
         /* ============================================
@@ -58,7 +183,7 @@ $applications = $pdo->query("
         ============================================ */
         .top-nav {
             background: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e5e7eb;
             padding: 0 32px;
             height: 68px;
             display: flex;
@@ -67,7 +192,8 @@ $applications = $pdo->query("
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
         }
 
         .nav-left {
@@ -83,6 +209,7 @@ $applications = $pdo->query("
             display: flex;
             align-items: center;
             gap: 8px;
+            text-decoration: none;
         }
 
         .nav-logo i {
@@ -92,12 +219,12 @@ $applications = $pdo->query("
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 6px;
-            margin-left: 32px;
+            gap: 4px;
+            margin-left: 24px;
         }
 
         .nav-links a {
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
@@ -127,7 +254,7 @@ $applications = $pdo->query("
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             background: white;
             cursor: pointer;
             display: flex;
@@ -139,7 +266,7 @@ $applications = $pdo->query("
         }
 
         .notification-btn:hover {
-            background: #f1f5f9;
+            background: #f8fafc;
             border-color: #cbd5e1;
         }
 
@@ -166,7 +293,7 @@ $applications = $pdo->query("
             cursor: pointer;
             padding: 6px 12px 6px 6px;
             border-radius: 50px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             background: white;
             transition: all 0.2s ease;
         }
@@ -248,6 +375,8 @@ $applications = $pdo->query("
 
         .welcome-banner .emoji {
             font-size: 48px;
+            position: relative;
+            z-index: 1;
         }
 
         /* ============================================
@@ -264,7 +393,7 @@ $applications = $pdo->query("
             background: white;
             border-radius: 12px;
             padding: 20px 24px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             transition: all 0.2s ease;
         }
 
@@ -326,7 +455,7 @@ $applications = $pdo->query("
         .panel {
             background: white;
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             padding: 24px;
         }
 
@@ -384,6 +513,7 @@ $applications = $pdo->query("
         .icon-yellow { background: #fef9c3; color: #a16207; }
         .icon-blue { background: #dbeafe; color: #1d4ed8; }
         .icon-green { background: #d1fae5; color: #047857; }
+        .icon-red { background: #fee2e2; color: #dc2626; }
 
         .job-info {
             flex: 1;
@@ -425,6 +555,11 @@ $applications = $pdo->query("
         .pill-remote {
             background: #ecfdf5;
             color: #10b981;
+        }
+
+        .job-days {
+            font-size: 12px;
+            color: #94a3b8;
         }
 
         .btn-apply {
@@ -495,31 +630,36 @@ $applications = $pdo->query("
         /* ============================================
            RESPONSIVE
         ============================================ */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #1e293b;
+            cursor: pointer;
+            padding: 4px;
+        }
+
         @media (max-width: 1024px) {
+            .sidebar {
+                display: none;
+            }
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
             .two-col {
                 grid-template-columns: 1fr;
             }
-        }
-
-        @media (max-width: 768px) {
-            .top-nav {
-                padding: 0 16px;
-                height: 60px;
-                flex-wrap: wrap;
-            }
             .nav-links {
                 display: none;
                 position: absolute;
-                top: 60px;
+                top: 68px;
                 left: 0;
                 right: 0;
                 background: white;
                 flex-direction: column;
                 padding: 16px;
-                border-bottom: 1px solid #e2e8f0;
+                border-bottom: 1px solid #e5e7eb;
                 box-shadow: 0 8px 16px rgba(0,0,0,0.06);
             }
             .nav-links.open {
@@ -531,6 +671,13 @@ $applications = $pdo->query("
             }
             .mobile-menu-btn {
                 display: flex !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                padding: 0 16px;
+                height: 60px;
             }
             .main-content {
                 padding: 16px;
@@ -580,166 +727,163 @@ $applications = $pdo->query("
                 gap: 6px;
             }
         }
-
-        /* Mobile menu button */
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #1e293b;
-            cursor: pointer;
-            padding: 4px;
-        }
     </style>
 </head>
 <body>
 
-    <!-- ==========================================
-    TOP NAVIGATION
-    ========================================== -->
-    <nav class="top-nav">
-        <div class="nav-left">
-            <a href="dashboard_freelancer.php" class="nav-logo">
-                <i class="fa-solid fa-chart-line"></i>
-                Freelance
-            </a>
-            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-            <div class="nav-links" id="navLinks">
-                <a href="dashboard_freelancer.php" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
-                <a href="browse_jobs.php"><i class="fa-solid fa-briefcase"></i> Browse Jobs</a>
-                <a href="my_applications.php"><i class="fa-solid fa-file-lines"></i> My Applications</a>
-                <a href="messages.php"><i class="fa-solid fa-comment-dots"></i> Messages</a>
-                <a href="portfolio.php"><i class="fa-solid fa-folder-open"></i> Portfolio</a>
-                <a href="earnings.php"><i class="fa-solid fa-wallet"></i> Earnings</a>
-                <a href="profile.php"><i class="fa-solid fa-user"></i> Profile</a>
-                <a href="settings.php"><i class="fa-solid fa-gear"></i> Settings</a>
-            </div>
-        </div>
-
-        <div class="nav-right">
-            <button class="notification-btn">
-                <i class="fa-regular fa-bell"></i>
-                <span class="notification-badge">3</span>
-            </button>
-            <div class="profile-dropdown">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($_SESSION['name']); ?>" alt="Avatar" class="profile-avatar">
-                <span class="profile-name"><?php echo escape($_SESSION['name']); ?></span>
-                <span class="profile-role">Freelancer</span>
-                <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
-            </div>
-        </div>
-    </nav>
+<div class="app-shell">
 
     <!-- ==========================================
-    MAIN CONTENT
+    SIDEBAR
     ========================================== -->
-    <main class="main-content">
-
-        <!-- WELCOME BANNER -->
-        <div class="welcome-banner">
+    <aside class="sidebar">
+        <div class="brand">
             <div>
-                <h1>Welcome back, <?php echo escape($_SESSION['name']); ?>! 👋</h1>
-                <p>Find amazing freelance opportunities and grow your skills.</p>
-            </div>
-            <div class="emoji">🚀</div>
-        </div>
-
-        <!-- STATS -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="icon icon-purple"><i class="fa-solid fa-briefcase"></i></div>
-                <div class="number"><?php echo $totalJobs; ?></div>
-                <div class="label">Available Jobs</div>
-                <a href="browse_jobs.php" class="link">View all →</a>
-            </div>
-            <div class="stat-card">
-                <div class="icon icon-blue"><i class="fa-solid fa-file-invoice"></i></div>
-                <div class="number"><?php echo $applicationsSent; ?></div>
-                <div class="label">Applications Sent</div>
-                <a href="my_applications.php" class="link">View all →</a>
-            </div>
-            <div class="stat-card">
-                <div class="icon icon-green"><i class="fa-solid fa-clock"></i></div>
-                <div class="number"><?php echo $inProgress; ?></div>
-                <div class="label">In Progress</div>
-                <a href="my_applications.php" class="link">View all →</a>
-            </div>
-            <div class="stat-card">
-                <div class="icon icon-orange"><i class="fa-solid fa-dollar-sign"></i></div>
-                <div class="number">RM <?php echo number_format($totalEarnings, 2); ?></div>
-                <div class="label">Total Earnings</div>
-                <a href="earnings.php" class="link">View all →</a>
+                <div class="logo"><i class="fa-solid fa-chart-line"></i> Freelance</div>
+                <div class="sub">Marketplace</div>
             </div>
         </div>
-
-        <!-- TWO COLUMN -->
-        <div class="two-col">
-
-            <!-- RECOMMENDED JOBS -->
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>📌 Recommended Jobs</h3>
-                    <a href="browse_jobs.php">View all →</a>
-                </div>
-                <?php foreach ($recommendedJobs as $job): ?>
-                <div class="job-item">
-                    <div class="job-icon icon-yellow"><?php echo strtoupper(substr($job['title'], 0, 1)); ?></div>
-                    <div class="job-info">
-                        <div class="title"><?php echo escape($job['title']); ?></div>
-                        <div class="meta"><?php echo escape($job['category']); ?></div>
-                        <div class="budget">RM <?php echo number_format($job['budget_min'], 2); ?> - RM <?php echo number_format($job['budget_max'], 2); ?></div>
-                    </div>
-                    <div class="job-right">
-                        <span class="pill pill-remote"><?php echo ucfirst($job['location_type']); ?></span>
-                        <a href="browse_jobs.php?apply=<?php echo $job['id']; ?>" class="btn-apply" onclick="return confirm('Apply for this job?')">Apply</a>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- APPLICATION STATUS -->
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>📋 Application Status</h3>
-                    <a href="my_applications.php">View all →</a>
-                </div>
-                <?php foreach ($applications as $app): ?>
-                <div class="status-item border-<?php echo $app['status'] == 'in_progress' ? 'yellow' : ($app['status'] == 'accepted' ? 'green' : ($app['status'] == 'rejected' ? 'red' : 'blue')); ?>">
-                    <div>
-                        <div class="title"><?php echo escape($app['job_title']); ?></div>
-                        <div class="client">Client: <?php echo escape($app['client_name']); ?></div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div class="status-label text-<?php echo $app['status'] == 'in_progress' ? 'yellow' : ($app['status'] == 'accepted' ? 'green' : ($app['status'] == 'rejected' ? 'red' : 'blue')); ?>">
-                            <?php echo ucfirst(str_replace('_', ' ', $app['status'])); ?>
-                        </div>
-                        <div class="date"><?php echo date('d M Y', strtotime($app['applied_at'])); ?></div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-
-        </div>
-    </main>
+        <nav class="menu">
+            <a href="dashboard_freelancer.php" class="active"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="browse_jobs.php"><i class="fa-solid fa-briefcase"></i> Browse Jobs</a>
+            <a href="my_applications.php"><i class="fa-solid fa-file-lines"></i> My Applications</a>
+            <a href="messages.php"><i class="fa-solid fa-comment-dots"></i> Messages</a>
+            <a href="portfolio.php"><i class="fa-solid fa-folder-open"></i> Portfolio</a>
+            <a href="earnings.php"><i class="fa-solid fa-wallet"></i> Earnings</a>
+            <a href="profile.php"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="settings_freelancer.php"><i class="fa-solid fa-gear"></i> Settings</a>
+        </nav>
+        <a href="index.php?logout=1" class="logout" onclick="return confirm('Are you sure you want to logout?')">
+            <i class="fa-solid fa-right-from-bracket"></i> Log out
+        </a>
+    </aside>
 
     <!-- ==========================================
-    JAVASCRIPT
+    CONTENT
     ========================================== -->
-    <script>
-        function toggleMobileMenu() {
-            document.getElementById('navLinks').classList.toggle('open');
-        }
+    <div class="content">
 
-        // Close mobile menu on link click
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                document.getElementById('navLinks').classList.remove('open');
+        <main class="main-content">
+
+            <!-- WELCOME BANNER -->
+            <div class="welcome-banner">
+                <div>
+                    <h1>Welcome back, <?php echo escape($_SESSION['name']); ?>! 👋</h1>
+                    <p>Find amazing freelance opportunities and grow your skills.</p>
+                </div>
+                <div class="emoji">🚀</div>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon icon-purple"><i class="fa-solid fa-briefcase"></i></div>
+                    <div class="number"><?php echo $totalJobs; ?></div>
+                    <div class="label">Available Jobs</div>
+                    <a href="browse_jobs.php" class="link">View all jobs →</a>
+                </div>
+                <div class="stat-card">
+                    <div class="icon icon-blue"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div class="number"><?php echo $applicationsSent; ?></div>
+                    <div class="label">Applications Sent</div>
+                    <a href="my_applications.php" class="link">View my applications →</a>
+                </div>
+                <div class="stat-card">
+                    <div class="icon icon-green"><i class="fa-solid fa-clock"></i></div>
+                    <div class="number"><?php echo $inProgress; ?></div>
+                    <div class="label">In Progress</div>
+                    <a href="my_applications.php" class="link">View projects →</a>
+                </div>
+                <div class="stat-card">
+                    <div class="icon icon-orange"><i class="fa-solid fa-dollar-sign"></i></div>
+                    <div class="number">RM <?php echo number_format($totalEarnings, 2); ?></div>
+                    <div class="label">Total Earnings</div>
+                    <a href="earnings.php" class="link">View earnings →</a>
+                </div>
+            </div>
+
+            <!-- TWO COLUMN -->
+            <div class="two-col">
+
+                <!-- RECOMMENDED JOBS -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>📌 Recommended Jobs</h3>
+                        <a href="browse_jobs.php">View all →</a>
+                    </div>
+                    <?php foreach ($recommendedJobs as $job): ?>
+                    <div class="job-item">
+                        <div class="job-icon icon-yellow"><?php echo strtoupper(substr($job['title'], 0, 1)); ?></div>
+                        <div class="job-info">
+                            <div class="title"><?php echo escape($job['title']); ?></div>
+                            <div class="meta"><?php echo escape($job['category']); ?></div>
+                            <div class="budget">RM <?php echo number_format($job['budget_min'], 2); ?> - RM <?php echo number_format($job['budget_max'], 2); ?></div>
+                        </div>
+                        <div class="job-right">
+                            <span class="pill pill-remote"><?php echo ucfirst($job['location_type']); ?></span>
+                            <span class="job-days"><?php echo rand(1, 10); ?> days left</span>
+                            <a href="browse_jobs.php?apply=<?php echo $job['id']; ?>" class="btn-apply" onclick="return confirm('Apply for this job?')">Apply</a>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- APPLICATION STATUS -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>📋 My Application Status</h3>
+                        <a href="my_applications.php">View all →</a>
+                    </div>
+                    <?php foreach ($applications as $app): ?>
+                    <div class="status-item border-<?php echo $app['status'] == 'in_progress' ? 'yellow' : ($app['status'] == 'accepted' ? 'green' : ($app['status'] == 'rejected' ? 'red' : 'blue')); ?>">
+                        <div>
+                            <div class="title"><?php echo escape($app['job_title']); ?></div>
+                            <div class="client">Client: <?php echo escape($app['client_name']); ?></div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="status-label text-<?php echo $app['status'] == 'in_progress' ? 'yellow' : ($app['status'] == 'accepted' ? 'green' : ($app['status'] == 'rejected' ? 'red' : 'blue')); ?>">
+                                <?php echo ucfirst(str_replace('_', ' ', $app['status'])); ?>
+                            </div>
+                            <div class="date"><?php echo date('d M Y', strtotime($app['applied_at'])); ?></div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ==========================================
+JAVASCRIPT
+========================================== -->
+<script>
+    function toggleMobileMenu() {
+        // Toggle sidebar visibility on small screens
+        const sb = document.querySelector('.sidebar');
+        if (!sb) return;
+        if (window.getComputedStyle(sb).display === 'none') {
+            sb.style.display = 'block';
+        } else {
+            sb.style.display = 'none';
+        }
+    }
+
+    // Highlight active sidebar link
+    (function() {
+        const path = window.location.pathname.split('/').pop();
+        document.querySelectorAll('.sidebar .menu a').forEach(a => {
+            const href = a.getAttribute('href').split('/').pop();
+            if (href === path) a.classList.add('active');
+            a.addEventListener('click', () => {
+                // allow normal navigation; also visually mark active immediately
+                document.querySelectorAll('.sidebar .menu a').forEach(x => x.classList.remove('active'));
+                a.classList.add('active');
             });
         });
-    </script>
+    })();
+</script>
 
 </body>
 </html>

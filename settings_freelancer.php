@@ -68,7 +68,7 @@ if (isset($_POST['save_settings'])) {
                 <a href="earnings.php" class="menu-item"><i class="fa-solid fa-wallet"></i> Earnings</a>
                 <a href="profile.php" class="menu-item"><i class="fa-solid fa-user"></i> Profile</a>
                 <a href="settings.php" class="menu-item active"><i class="fa-solid fa-gear"></i> Settings</a>
-                <a href="../index.php?logout=1" class="menu-item" style="margin-top: 20px; border-top: 1px solid var(--color-border-line); padding-top: 16px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                <a href="index.php?logout=1" class="menu-item" style="margin-top: 20px; border-top: 1px solid var(--color-border-line); padding-top: 16px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
             </nav>
         </aside>
         <main class="main-content">
@@ -120,7 +120,7 @@ if (isset($_POST['save_settings'])) {
                 <div class="fm-panel">
                     <h2>Account</h2>
                     <p style="margin:0 0 16px; color:#64748b;">Use the button below to sign out from this workspace.</p>
-                    <a href="../index.php?logout=1" class="fm-btn" style="background:#ef4444; text-decoration:none; display:inline-block;">Log Out</a>
+                    <a href="index.php?logout=1" class="fm-btn" style="background:#ef4444; text-decoration:none; display:inline-block;">Log Out</a>
                 </div>
             </div>
         </main>

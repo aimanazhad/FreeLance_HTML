@@ -1,6 +1,11 @@
 <?php
 require_once 'config.php';
 
+if (isset($_GET['logout'])) {
+    logoutUser();
+    redirect('index.php');
+}
+
 // ============================================
 // LOGIN PROCESS
 // ============================================
