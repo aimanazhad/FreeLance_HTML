@@ -27,7 +27,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     $pdo->exec("SET NAMES utf8mb4");
 
-    // Create required tables if they do not exist
+    // Create users table
     $pdo->exec("CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
@@ -42,72 +42,84 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
+    // Create admins table (separate from users)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS admins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        email VARCHAR(100) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        full_name VARCHAR(100) NOT NULL,
+        phone VARCHAR(20) DEFAULT NULL,
+        role ENUM('super_admin','admin','moderator') DEFAULT 'admin',
+        status ENUM('active','inactive') DEFAULT 'active',
+        last_login TIMESTAMP NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )");
+
+    // Create jobs table
     $pdo->exec("
 CREATE TABLE IF NOT EXISTS jobs (
     id INT AUTO_INCREMENT PRIMARY KEY,
-
     client_id INT NOT NULL,
-
     title VARCHAR(150) NOT NULL,
-
     category VARCHAR(100) NOT NULL,
-
     description TEXT NOT NULL,
-
     budget_min DECIMAL(10,2) DEFAULT 0.00,
-
     budget_max DECIMAL(10,2) DEFAULT 0.00,
-
     project_type VARCHAR(50) DEFAULT NULL,
-
     location_type VARCHAR(50) DEFAULT NULL,
-
     deadline DATE DEFAULT NULL,
-
     skills TEXT DEFAULT NULL,
-
-    status ENUM('active','completed','cancelled') DEFAULT 'active',
-
+    status ENUM('active','in_progress','completed','cancelled') DEFAULT 'active',
+    hired_freelancer_id INT DEFAULT NULL,
+    completed_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
-
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX (client_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
-    ) ENGINE=InnoDB
-    DEFAULT CHARSET=utf8mb4
-    COLLATE=utf8mb4_unicode_ci;
-    ");
-
+    // Create applications table
     $pdo->exec("CREATE TABLE IF NOT EXISTS applications (
         id INT AUTO_INCREMENT PRIMARY KEY,
         job_id INT NOT NULL,
         freelancer_id INT NOT NULL,
         status VARCHAR(30) DEFAULT 'pending',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        cover_letter TEXT DEFAULT NULL,
+        bid_amount DECIMAL(10,2) DEFAULT NULL,
+        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        message TEXT DEFAULT NULL
     )");
 
+    // Create messages table
     $pdo->exec("CREATE TABLE IF NOT EXISTS messages (
         id INT AUTO_INCREMENT PRIMARY KEY,
         sender_id INT NOT NULL,
         receiver_id INT NOT NULL,
         job_id INT DEFAULT NULL,
         message TEXT NOT NULL,
+        is_read TINYINT(1) DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
+    // Create payments table
     $pdo->exec("CREATE TABLE IF NOT EXISTS payments (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
+        freelancer_id INT DEFAULT NULL,
         job_id INT DEFAULT NULL,
         amount DECIMAL(10,2) DEFAULT 0,
         method VARCHAR(50) DEFAULT NULL,
         description TEXT DEFAULT NULL,
         status VARCHAR(20) DEFAULT 'pending',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        reference VARCHAR(100) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        payment_date TIMESTAMP NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )");
 
+    // Create portfolio table
     $pdo->exec("CREATE TABLE IF NOT EXISTS portfolio (
         id INT AUTO_INCREMENT PRIMARY KEY,
         freelancer_id INT NOT NULL,
@@ -117,6 +129,7 @@ CREATE TABLE IF NOT EXISTS jobs (
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
+    // Create reviews table
     $pdo->exec("CREATE TABLE IF NOT EXISTS reviews (
         id INT AUTO_INCREMENT PRIMARY KEY,
         reviewer_id INT NOT NULL,
@@ -127,6 +140,7 @@ CREATE TABLE IF NOT EXISTS jobs (
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
+    // Create saved_freelancers table
     $pdo->exec("CREATE TABLE IF NOT EXISTS saved_freelancers (
         id INT AUTO_INCREMENT PRIMARY KEY,
         client_id INT NOT NULL,
@@ -151,14 +165,21 @@ if (session_status() === PHP_SESSION_NONE) {
 // ============================================
 
 /**
- * Check if user is logged in
+ * Check if user is logged in (from users table)
  */
 function isLoggedIn() {
     return isset($_SESSION['user_id']) && isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true;
 }
 
 /**
- * Check if user is admin
+ * Check if admin is logged in (from admins table)
+ */
+function isAdminLoggedIn() {
+    return isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
+}
+
+/**
+ * Check if user is admin (from users table - legacy)
  */
 function isAdmin() {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
@@ -192,6 +213,10 @@ function redirect($url) {
 function escape($data) {
     return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
 }
+
+// ============================================
+// USER FUNCTIONS (from users table)
+// ============================================
 
 /**
  * Get user data by ID
@@ -256,14 +281,12 @@ function getRecentUsers($limit = 5) {
 }
 
 /**
- * Create a new user
+ * Create a new user (plain password for demo)
  */
 function createUser($name, $email, $password, $role = 'client') {
     global $pdo;
-    $hashedPassword = md5($password); // Demo sahaja. Guna password_hash() untuk production
-    
     $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-    return $stmt->execute([$name, $email, $hashedPassword, $role]);
+    return $stmt->execute([$name, $email, $password, $role]);
 }
 
 /**
@@ -285,7 +308,7 @@ function deleteUser($id) {
 }
 
 /**
- * Update user status (active/suspended)
+ * Update user status
  */
 function updateUserStatus($id, $status) {
     global $pdo;
@@ -304,14 +327,12 @@ function emailExists($email) {
 }
 
 /**
- * Login user
+ * Login user (plain password for demo)
  */
 function loginUser($email, $password) {
     global $pdo;
-    $hashedPassword = md5($password); // Demo sahaja
-    
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-    $stmt->execute([$email, $hashedPassword]);
+    $stmt->execute([$email, $password]);
     return $stmt->fetch();
 }
 
@@ -334,7 +355,94 @@ function logoutUser() {
 }
 
 // ============================================
-// CSRF TOKEN GENERATION (for forms)
+// ADMIN FUNCTIONS (from admins table)
+// ============================================
+
+/**
+ * Get admin data by ID
+ */
+function getAdminById($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM admins WHERE id = ?");
+    $stmt->execute([$id]);
+    return $stmt->fetch();
+}
+
+/**
+ * Get admin data by email
+ */
+function getAdminByEmail($email) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM admins WHERE email = ?");
+    $stmt->execute([$email]);
+    return $stmt->fetch();
+}
+
+/**
+ * Get admin data by username
+ */
+function getAdminByUsername($username) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM admins WHERE username = ?");
+    $stmt->execute([$username]);
+    return $stmt->fetch();
+}
+
+/**
+ * Get all admins
+ */
+function getAllAdmins() {
+    global $pdo;
+    return $pdo->query("SELECT * FROM admins ORDER BY created_at DESC")->fetchAll();
+}
+
+/**
+ * Count total admins
+ */
+function countAdmins() {
+    global $pdo;
+    return $pdo->query("SELECT COUNT(*) FROM admins")->fetchColumn();
+}
+
+/**
+ * Login admin (from admins table)
+ */
+function loginAdmin($email, $password) {
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT * FROM admins WHERE email = ? AND password = ? AND status = 'active'");
+    $stmt->execute([$email, $password]);
+    return $stmt->fetch();
+}
+
+/**
+ * Update admin last login
+ */
+function updateAdminLastLogin($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE admins SET last_login = NOW() WHERE id = ?");
+    return $stmt->execute([$id]);
+}
+
+/**
+ * Update admin status
+ */
+function updateAdminStatus($id, $status) {
+    global $pdo;
+    $stmt = $pdo->prepare("UPDATE admins SET status = ? WHERE id = ?");
+    return $stmt->execute([$status, $id]);
+}
+
+/**
+ * Delete admin
+ */
+function deleteAdmin($id) {
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM admins WHERE id = ?");
+    return $stmt->execute([$id]);
+}
+
+// ============================================
+// CSRF TOKEN GENERATION
 // ============================================
 
 function generateCSRFToken() {
@@ -353,11 +461,4 @@ function verifyCSRFToken($token) {
 // ============================================
 
 $csrf_token = generateCSRFToken();
-
-// ============================================
-// DEBUGGING (Optional - Remove in production)
-// ============================================
-
-// Uncomment below to test database connection
-// echo "✅ Database connected successfully!";
 ?>

@@ -7,22 +7,27 @@ if (!isLoggedIn() || !isFreelancer()) {
 
 $user_id = $_SESSION['user_id'];
 
-// Get earnings
+// Get earnings (payments received as freelancer)
 $payments = $pdo->query("
-    SELECT * FROM payments 
-    WHERE user_id = $user_id 
-    ORDER BY created_at DESC
+    SELECT p.*, 
+           j.title as job_title,
+           u.name as client_name
+    FROM payments p
+    LEFT JOIN jobs j ON p.job_id = j.id
+    LEFT JOIN users u ON p.user_id = u.id
+    WHERE p.freelancer_id = $user_id
+    ORDER BY p.created_at DESC
 ")->fetchAll();
 
-$balance = $pdo->query("SELECT SUM(amount) FROM payments WHERE user_id = $user_id AND status = 'paid'")->fetchColumn() ?? 0;
-$pendingBalance = $pdo->query("SELECT SUM(amount) FROM payments WHERE user_id = $user_id AND status = 'pending'")->fetchColumn() ?? 0;
+$balance = $pdo->query("SELECT SUM(amount) FROM payments WHERE freelancer_id = $user_id AND status = 'paid'")->fetchColumn() ?? 0;
+$pendingBalance = $pdo->query("SELECT SUM(amount) FROM payments WHERE freelancer_id = $user_id AND status = 'pending'")->fetchColumn() ?? 0;
 
 // Process withdrawal
 if (isset($_POST['withdraw'])) {
     $amount = $_POST['amount'];
     if ($amount > 0 && $amount <= $balance) {
-        $stmt = $pdo->prepare("INSERT INTO payments (user_id, amount, method, description, status) VALUES (?, ?, 'bank', 'Withdrawal', 'pending')");
-        $stmt->execute([$user_id, -$amount]);
+        $stmt = $pdo->prepare("INSERT INTO payments (user_id, freelancer_id, amount, method, description, status) VALUES (?, ?, ?, 'bank', 'Withdrawal', 'pending')");
+        $stmt->execute([$_SESSION['user_id'], $user_id, -$amount]);
         redirect('earnings.php?success=withdrawn');
     }
 }
@@ -141,6 +146,10 @@ if (isset($_POST['withdraw'])) {
         .empty i { font-size: 40px; color: #d1d5db; display: block; margin-bottom: 12px; }
         .empty p { font-size: 14px; }
 
+        .badge { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .badge-paid { background: #d1fae5; color: #047857; }
+        .badge-pending { background: #fef3c7; color: #d97706; }
+
         .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; font-size: 14px; }
         .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
 
@@ -251,15 +260,25 @@ if (isset($_POST['withdraw'])) {
             <?php if (count($payments) > 0): ?>
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Job</th>
+                            <th>Client</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <?php foreach ($payments as $p): ?>
                         <tr>
                             <td><?php echo date('d M Y', strtotime($p['created_at'])); ?></td>
-                            <td><?php echo escape($p['description'] ?? 'Payment'); ?></td>
+                            <td><?php echo escape($p['job_title'] ?? 'Payment'); ?></td>
+                            <td><?php echo escape($p['client_name'] ?? '-'); ?></td>
                             <td style="font-weight:600;color:<?php echo $p['amount'] < 0 ? '#dc2626' : '#10b981'; ?>">
                                 <?php echo $p['amount'] < 0 ? '-' : '+'; ?> RM <?php echo number_format(abs($p['amount']), 2); ?>
                             </td>
+                            <td><span class="badge badge-<?php echo $p['status']; ?>"><?php echo ucfirst($p['status']); ?></span></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>

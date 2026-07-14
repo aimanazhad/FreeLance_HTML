@@ -7,8 +7,12 @@ if (!isLoggedIn() || !isFreelancer()) {
 
 $user_id = $_SESSION['user_id'];
 
-// Get all active jobs
-$jobs = $pdo->query("SELECT * FROM jobs WHERE status = 'active' ORDER BY created_at DESC")->fetchAll();
+// Get all active jobs (only active ones)
+$jobs = $pdo->query("
+    SELECT * FROM jobs 
+    WHERE status = 'active' 
+    ORDER BY created_at DESC
+")->fetchAll();
 
 // Get categories for filter
 $categories = $pdo->query("SELECT DISTINCT category FROM jobs WHERE status = 'active'")->fetchAll();
@@ -17,16 +21,24 @@ $categories = $pdo->query("SELECT DISTINCT category FROM jobs WHERE status = 'ac
 if (isset($_GET['apply']) && is_numeric($_GET['apply'])) {
     $job_id = $_GET['apply'];
     
+    // Check if already applied
     $check = $pdo->prepare("SELECT * FROM applications WHERE job_id = ? AND freelancer_id = ?");
     $check->execute([$job_id, $user_id]);
     
     if ($check->rowCount() == 0) {
-        $stmt = $pdo->prepare("INSERT INTO applications (job_id, freelancer_id, status) VALUES (?, ?, 'pending')");
+        $stmt = $pdo->prepare("INSERT INTO applications (job_id, freelancer_id, status, applied_at) VALUES (?, ?, 'pending', NOW())");
         $stmt->execute([$job_id, $user_id]);
         $success = '✅ Application submitted successfully!';
     } else {
         $error = '⚠️ You already applied for this job.';
     }
+    
+    // Refresh jobs
+    $jobs = $pdo->query("
+        SELECT * FROM jobs 
+        WHERE status = 'active' 
+        ORDER BY created_at DESC
+    ")->fetchAll();
 }
 
 // Filter logic
@@ -42,6 +54,14 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         return strpos(strtolower($j['title']), $search) !== false;
     });
 }
+
+// Get application statuses for all jobs
+$appliedStatus = [];
+$stmt = $pdo->prepare("SELECT job_id, status FROM applications WHERE freelancer_id = ?");
+$stmt->execute([$user_id]);
+while ($row = $stmt->fetch()) {
+    $appliedStatus[$row['job_id']] = $row['status'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -56,501 +76,128 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        /* ============================================
-           SAME AS DASHBOARD
-        ============================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #f3f0ff; min-height: 100vh; }
+        .dashboard-container { display: flex; min-height: 100vh; }
 
-        body {
-            background: #f3f0ff;
-            min-height: 100vh;
-        }
-
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* ============================================
-           SIDEBAR - SAME AS DASHBOARD
-        ============================================ */
         .sidebar {
-            width: 260px;
-            background: #ffffff;
-            border-right: 1px solid #e5e7eb;
-            padding: 24px 16px;
-            flex-shrink: 0;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
+            width: 260px; background: #ffffff; border-right: 1px solid #e5e7eb; padding: 24px 16px;
+            flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto;
         }
-
-        .sidebar-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 32px;
-            padding: 0 8px;
-        }
-
-        .sidebar-brand .logo-icon {
-            font-size: 28px;
-            color: #6366f1;
-        }
-
-        .sidebar-brand .brand-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1f2937;
-        }
-
-        .sidebar-brand .brand-sub {
-            font-size: 12px;
-            color: #6b7280;
-            display: block;
-            margin-top: -2px;
-        }
-
-        .sidebar-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
+        .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding: 0 8px; }
+        .sidebar-brand .logo-icon { font-size: 28px; color: #6366f1; }
+        .sidebar-brand .brand-title { font-size: 18px; font-weight: 700; color: #1f2937; }
+        .sidebar-brand .brand-sub { font-size: 12px; color: #6b7280; display: block; margin-top: -2px; }
+        .sidebar-menu { display: flex; flex-direction: column; gap: 4px; }
         .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            border-radius: 10px;
-            color: #6b7280;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px;
+            color: #6b7280; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s ease;
         }
-
-        .sidebar-menu a:hover {
-            background: #f5f3ff;
-            color: #6366f1;
-        }
-
-        .sidebar-menu a.active {
-            background: #eef2ff;
-            color: #6366f1;
-            font-weight: 600;
-        }
-
-        .sidebar-menu a i {
-            width: 20px;
-            font-size: 16px;
-        }
-
+        .sidebar-menu a:hover { background: #f5f3ff; color: #6366f1; }
+        .sidebar-menu a.active { background: #eef2ff; color: #6366f1; font-weight: 600; }
+        .sidebar-menu a i { width: 20px; font-size: 16px; }
         .sidebar-menu .logout {
-            margin-top: 20px;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 16px;
-            color: #ef4444;
+            margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 16px; color: #ef4444;
         }
+        .sidebar-menu .logout:hover { background: #fef2f2; color: #dc2626; }
 
-        .sidebar-menu .logout:hover {
-            background: #fef2f2;
-            color: #dc2626;
-        }
+        .main-content { flex: 1; padding: 32px 40px 60px; overflow-y: auto; }
 
-        /* ============================================
-           MAIN CONTENT
-        ============================================ */
-        .main-content {
-            flex: 1;
-            padding: 32px 40px 60px;
-            overflow-y: auto;
-        }
-
-        /* ============================================
-           HERO BANNER - SAME AS DASHBOARD
-        ============================================ */
         .hero-banner {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            border-radius: 16px;
-            padding: 32px 40px;
-            color: white;
-            margin-bottom: 28px;
-            position: relative;
-            overflow: hidden;
+            border-radius: 16px; padding: 32px 40px; color: white; margin-bottom: 28px;
+            position: relative; overflow: hidden;
         }
-
         .hero-banner::after {
-            content: '';
-            position: absolute;
-            right: -60px;
-            top: -60px;
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.05);
+            content: ''; position: absolute; right: -60px; top: -60px;
+            width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.05);
         }
+        .hero-banner h1 { font-size: 28px; font-weight: 800; }
+        .hero-banner p { font-size: 15px; opacity: 0.85; margin-top: 4px; }
+        .hero-banner .emoji { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); font-size: 48px; z-index: 1; }
 
-        .hero-banner h1 {
-            font-size: 28px;
-            font-weight: 800;
-        }
-
-        .hero-banner p {
-            font-size: 15px;
-            opacity: 0.85;
-            margin-top: 4px;
-        }
-
-        .hero-banner .emoji {
-            position: absolute;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 48px;
-            z-index: 1;
-        }
-
-        /* ============================================
-           TOOLBAR
-        ============================================ */
         .toolbar {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
+            display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+            background: white; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb;
         }
-
-        .toolbar input,
-        .toolbar select {
-            padding: 10px 14px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #f9fafb;
-            outline: none;
-            flex: 1;
-            min-width: 160px;
-            color: #1f2937;
+        .toolbar input, .toolbar select {
+            padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;
+            background: #f9fafb; outline: none; flex: 1; min-width: 160px; color: #1f2937;
         }
-
-        .toolbar input:focus,
-        .toolbar select:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+        .toolbar input:focus, .toolbar select:focus {
+            border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
         }
-
-        .toolbar input::placeholder {
-            color: #9ca3af;
-        }
-
         .toolbar .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px;
+            cursor: pointer; transition: all 0.2s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
         }
+        .toolbar .btn-primary { background: #6366f1; color: white; }
+        .toolbar .btn-primary:hover { background: #4f46e5; }
+        .toolbar .btn-secondary { background: #f1f5f9; color: #64748b; }
+        .toolbar .btn-secondary:hover { background: #e2e8f0; }
 
-        .toolbar .btn-primary {
-            background: #6366f1;
-            color: white;
-        }
-
-        .toolbar .btn-primary:hover {
-            background: #4f46e5;
-        }
-
-        .toolbar .btn-secondary {
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        .toolbar .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-
-        /* ============================================
-           JOBS GRID
-        ============================================ */
-        .jobs-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
+        .jobs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
         .job-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: all 0.2s ease;
+            background: white; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb;
+            display: flex; flex-direction: column; gap: 10px; transition: all 0.2s ease;
         }
-
-        .job-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-        }
-
-        .job-card .top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
+        .job-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .job-card .top { display: flex; justify-content: space-between; align-items: flex-start; }
         .job-card .icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 16px;
-            background: #f2eeff;
-            color: #6c4ce0;
+            width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; font-weight: 700; font-size: 16px; background: #f2eeff; color: #6c4ce0;
         }
-
-        .job-card .title {
-            font-weight: 700;
-            font-size: 15px;
-            color: #0f172a;
-        }
-
-        .job-card .meta {
-            font-size: 12px;
-            color: #94a3b8;
-        }
-
-        .job-card .budget {
-            font-weight: 700;
-            font-size: 14px;
-            color: #0f172a;
-            margin-top: 4px;
-        }
-
-        .job-card .desc {
-            font-size: 13px;
-            color: #64748b;
-            line-height: 1.5;
-        }
-
-        .job-card .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: auto;
-        }
-
+        .job-card .title { font-weight: 700; font-size: 15px; color: #0f172a; }
+        .job-card .meta { font-size: 12px; color: #94a3b8; }
+        .job-card .budget { font-weight: 700; font-size: 14px; color: #0f172a; margin-top: 4px; }
+        .job-card .desc { font-size: 13px; color: #64748b; line-height: 1.5; }
+        .job-card .footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
         .job-card .pill {
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 600;
-            background: #ecfdf5;
-            color: #10b981;
+            padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+            background: #ecfdf5; color: #10b981;
         }
 
         .btn-apply {
-            background: #6366f1;
-            color: white;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s ease;
+            background: #6366f1; color: white; border: none; padding: 6px 14px; border-radius: 6px;
+            font-weight: 600; font-size: 12px; cursor: pointer; text-decoration: none; transition: all 0.2s ease;
         }
-
-        .btn-apply:hover {
-            background: #4f46e5;
-        }
-
+        .btn-apply:hover { background: #4f46e5; }
         .btn-applied {
-            background: #f1f5f9;
-            color: #94a3b8;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: default;
+            background: #f1f5f9; color: #94a3b8; border: none; padding: 6px 14px; border-radius: 6px;
+            font-weight: 600; font-size: 12px; cursor: default;
         }
+        .btn-applied.pending { background: #fef3c7; color: #d97706; }
+        .btn-applied.accepted { background: #d1fae5; color: #047857; }
+        .btn-applied.rejected { background: #fee2e2; color: #dc2626; }
+        .btn-applied.in_progress { background: #fef3c7; color: #d97706; }
+        .btn-applied.completed { background: #dbeafe; color: #1d4ed8; }
 
-        .bookmark {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            font-size: 18px;
-        }
+        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 600; font-size: 14px; }
+        .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .alert-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
 
-        .bookmark.active {
-            color: #6366f1;
-        }
+        .empty { text-align: center; padding: 60px; color: #94a3b8; grid-column: span 2; }
+        .empty i { font-size: 48px; color: #d1d5db; margin-bottom: 16px; display: block; }
+        .empty h3 { font-size: 18px; font-weight: 600; color: #1f2937; margin-bottom: 8px; }
+        .empty p { font-size: 14px; color: #94a3b8; }
 
-        .empty {
-            text-align: center;
-            padding: 60px;
-            color: #94a3b8;
-        }
-
-        .empty i {
-            font-size: 48px;
-            color: #d1d5db;
-            margin-bottom: 16px;
-            display: block;
-        }
-
-        .empty h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-
-        .empty p {
-            font-size: 14px;
-            color: #94a3b8;
-        }
-
-        /* ============================================
-           ALERT
-        ============================================ */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .alert-success {
-            background: #f0fdf4;
-            color: #16a34a;
-            border: 1px solid #bbf7d0;
-        }
-
-        .alert-danger {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
-        }
-
-        /* ============================================
-           RESPONSIVE
-        ============================================ */
-        @media (max-width: 1024px) {
-            .jobs-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
+        @media (max-width: 1024px) { .jobs-grid { grid-template-columns: 1fr; } .empty { grid-column: span 1; } }
         @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-                padding: 16px 12px;
-            }
-
-            .main-content {
-                padding: 20px;
-            }
-
-            .toolbar {
-                flex-direction: column;
-            }
-
-            .toolbar input {
-                min-width: auto;
-            }
-
-            .hero-banner .emoji {
-                display: none;
-            }
-
-            .hero-banner h1 {
-                font-size: 24px;
-            }
-
-            .hero-banner p {
-                font-size: 14px;
-            }
+            .sidebar { width: 200px; padding: 16px 12px; }
+            .main-content { padding: 20px; }
+            .toolbar { flex-direction: column; }
+            .hero-banner .emoji { display: none; }
+            .hero-banner h1 { font-size: 24px; }
         }
-
         @media (max-width: 480px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                border-right: none;
-                border-bottom: 1px solid #e5e7eb;
-            }
-
-            .dashboard-container {
-                flex-direction: column;
-            }
-
-            .sidebar-menu {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-
-            .sidebar-menu a {
-                padding: 8px 12px;
-                font-size: 13px;
-            }
-
-            .sidebar-menu .logout {
-                margin-top: 0;
-                border-top: none;
-                padding-top: 0;
-            }
-
-            .jobs-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-banner {
-                padding: 24px;
-            }
-
-            .hero-banner h1 {
-                font-size: 22px;
-            }
-
-            .job-card .footer {
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-
-            .empty h3 {
-                font-size: 16px;
-            }
-
-            .empty p {
-                font-size: 13px;
-            }
+            .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid #e5e7eb; }
+            .dashboard-container { flex-direction: column; }
+            .sidebar-menu { flex-direction: row; flex-wrap: wrap; }
+            .sidebar-menu a { padding: 8px 12px; font-size: 13px; }
+            .sidebar-menu .logout { margin-top: 0; border-top: none; padding-top: 0; }
+            .jobs-grid { grid-template-columns: 1fr; }
+            .hero-banner { padding: 24px; }
+            .hero-banner h1 { font-size: 22px; }
         }
     </style>
 </head>
@@ -558,7 +205,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
 <div class="dashboard-container">
 
-    <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-brand">
             <i class="fa-solid fa-chart-line logo-icon"></i>
@@ -567,7 +213,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                 <span class="brand-sub">Marketplace</span>
             </div>
         </div>
-
         <nav class="sidebar-menu">
             <a href="dashboard_freelancer.php"><i class="fa-solid fa-house"></i> Dashboard</a>
             <a href="browse_jobs.php" class="active"><i class="fa-solid fa-briefcase"></i> Browse Jobs</a>
@@ -583,10 +228,8 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         </nav>
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="main-content">
 
-        <!-- HERO BANNER -->
         <div class="hero-banner">
             <div>
                 <h1>🔍 Browse Jobs</h1>
@@ -595,7 +238,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
             <div class="emoji">🚀</div>
         </div>
 
-        <!-- ALERTS -->
         <?php if (isset($success)): ?>
             <div class="alert alert-success"><?php echo $success; ?></div>
         <?php endif; ?>
@@ -603,7 +245,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
             <div class="alert alert-danger"><?php echo $error; ?></div>
         <?php endif; ?>
 
-        <!-- TOOLBAR -->
         <form method="GET" class="toolbar">
             <input type="text" name="search" placeholder="Search jobs..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
             <select name="category">
@@ -618,13 +259,10 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
             <a href="browse_jobs.php" class="btn btn-secondary"><i class="fa-solid fa-rotate-left"></i> Reset</a>
         </form>
 
-        <!-- JOBS GRID -->
         <div class="jobs-grid">
             <?php if (count($filteredJobs) > 0): ?>
                 <?php foreach ($filteredJobs as $job): 
-                    $applied = $pdo->prepare("SELECT * FROM applications WHERE job_id = ? AND freelancer_id = ?");
-                    $applied->execute([$job['id'], $user_id]);
-                    $isApplied = $applied->rowCount() > 0;
+                    $status = $appliedStatus[$job['id']] ?? null;
                 ?>
                 <div class="job-card">
                     <div class="top">
@@ -635,9 +273,6 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                                 <div class="meta"><?php echo escape($job['category']); ?></div>
                             </div>
                         </div>
-                        <button class="bookmark <?php echo $job['bookmarked'] ?? false ? 'active' : ''; ?>">
-                            <i class="fa-<?php echo ($job['bookmarked'] ?? false) ? 'solid' : 'regular'; ?> fa-bookmark"></i>
-                        </button>
                     </div>
                     <div class="desc"><?php echo escape(substr($job['description'] ?? '', 0, 120)) . '...'; ?></div>
                     <div class="footer">
@@ -645,8 +280,22 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                             <div class="budget">RM <?php echo number_format($job['budget_min'], 2); ?> - RM <?php echo number_format($job['budget_max'], 2); ?></div>
                             <span class="pill"><?php echo ucfirst($job['location_type']); ?></span>
                         </div>
-                        <?php if ($isApplied): ?>
-                            <span class="btn-applied"><i class="fa-regular fa-check-circle"></i> Applied</span>
+                        <?php if ($status): ?>
+                            <span class="btn-applied <?php echo $status; ?>">
+                                <?php if ($status == 'pending'): ?>
+                                    <i class="fa-regular fa-clock"></i> Pending
+                                <?php elseif ($status == 'accepted'): ?>
+                                    <i class="fa-regular fa-check-circle"></i> Accepted 🎉
+                                <?php elseif ($status == 'rejected'): ?>
+                                    <i class="fa-regular fa-circle-xmark"></i> Rejected
+                                <?php elseif ($status == 'in_progress'): ?>
+                                    <i class="fa-regular fa-spinner"></i> In Progress
+                                <?php elseif ($status == 'completed'): ?>
+                                    <i class="fa-regular fa-check-circle"></i> Completed
+                                <?php else: ?>
+                                    <?php echo ucfirst($status); ?>
+                                <?php endif; ?>
+                            </span>
                         <?php else: ?>
                             <a href="browse_jobs.php?apply=<?php echo $job['id']; ?>" class="btn-apply" onclick="return confirm('Apply for this job?')">Apply Now</a>
                         <?php endif; ?>
@@ -654,7 +303,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                 </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="empty" style="grid-column: span 2;">
+                <div class="empty">
                     <i class="fa-regular fa-face-frown"></i>
                     <h3>No jobs found</h3>
                     <p>Try adjusting your filters or search terms.</p>
