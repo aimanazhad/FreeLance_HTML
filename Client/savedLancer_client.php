@@ -9,7 +9,7 @@ $user_id = $_SESSION['user_id'];
 
 // Get saved freelancers
 $saved = $pdo->query("
-    SELECT u.id, u.name, u.email, u.bio, u.avatar
+    SELECT u.id, u.name, u.email
     FROM saved_freelancers s
     JOIN users u ON s.freelancer_id = u.id
     WHERE s.client_id = $user_id
@@ -36,7 +36,7 @@ if (isset($_GET['remove']) && is_numeric($_GET['remove'])) {
 }
 
 // Get all freelancers (to add)
-$allFreelancers = $pdo->query("SELECT id, name, role FROM users WHERE role = 'freelancer' ORDER BY name")->fetchAll();
+$allFreelancers = $pdo->query("SELECT id, name FROM users WHERE role = 'freelancer' ORDER BY name")->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -44,7 +44,7 @@ $allFreelancers = $pdo->query("SELECT id, name, role FROM users WHERE role = 'fr
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saved Freelancers - Freelance Marketplace</title>
+    <title>Saved Freelancers</title>
     <link rel="stylesheet" href="client-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,9 +92,9 @@ $allFreelancers = $pdo->query("SELECT id, name, role FROM users WHERE role = 'fr
                 <a href="jobs_client.php" class="menu-item"><i class="fa-solid fa-circle-plus"></i> Post a Job</a>
                 <a href="myjob_client.php" class="menu-item"><i class="fa-solid fa-file-lines"></i> My Jobs</a>
                 <a href="message_client.php" class="menu-item"><i class="fa-solid fa-comment-dots"></i> Messages</a>
-                <a href="payment_client.php" class="menu-item"><i class="fa-solid fa-credit-card"></i> Payment</a>
+                <a href="payment_client.php" class="menu-item"><i class="fa-solid fa-credit-card"></i> Payments</a>
                 <a href="savedLancer_client.php" class="menu-item active"><i class="fa-solid fa-star"></i> Saved Freelancers</a>
-                <a href="review_client.php" class="menu-item"><i class="fa-solid fa-star-half-stroke"></i> Review</a>
+                <a href="review_client.php" class="menu-item"><i class="fa-solid fa-star-half-stroke"></i> Reviews</a>
                 <a href="profile_client.php" class="menu-item"><i class="fa-solid fa-user"></i> Profile</a>
                 <a href="settings_client.php" class="menu-item"><i class="fa-solid fa-gear"></i> Settings</a>
                 <a href="../index.php?logout=1" class="menu-item" style="margin-top: 20px; border-top: 1px solid var(--border-line); padding-top: 16px;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
@@ -163,14 +163,12 @@ $allFreelancers = $pdo->query("SELECT id, name, role FROM users WHERE role = 'fr
                                     <h4 class="freelancer-name"><?php echo escape($f['name']); ?></h4>
                                 </div>
                                 <span class="freelancer-role"><?php echo escape($f['email']); ?></span>
-                                <?php if ($f['bio']): ?>
-                                    <p style="font-size:13px;color:#6b7280;margin:0;"><?php echo escape(substr($f['bio'], 0, 60)) . '...'; ?></p>
-                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="action-buttons">
                             <a href="message_client.php" class="btn-secondary"><i class="fa-regular fa-comment"></i> Message</a>
                             <a href="savedLancer_client.php?remove=<?php echo $f['id']; ?>" class="btn-danger" onclick="return confirm('Remove from saved?')"><i class="fa-regular fa-bookmark"></i> Remove</a>
+                            <a href="#" class="btn-primary" onclick="alert('Hire feature coming soon!')"><i class="fa-solid fa-handshake"></i> Hire Now</a>
                         </div>
                     </article>
                     <?php endforeach; ?>
