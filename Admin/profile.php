@@ -2,54 +2,63 @@
 require_once '../config.php';
 
 // Restrict page to logged in admins only
-if (!isLoggedIn() || !isAdmin()) {
-    redirect('../index.php');
+if (!isAdminLoggedIn()) {
+    redirect('adminlogin.php');
 }
 
-$user = getUserById($_SESSION['user_id']);
+// Get admin data from admins table
+$admin_id = $_SESSION['admin_id'];
+$admin = getAdminById($admin_id);
 $error = '';
 $success = '';
 
-// Update profile info
+// Update profile info - GUNA TABLE ADMINS
 if (isset($_POST['update_profile'])) {
-    $name = trim($_POST['name']);
+    $full_name = trim($_POST['full_name']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone'] ?? '');
+    $username = trim($_POST['username'] ?? '');
 
-    if (empty($name) || empty($email)) {
+    if (empty($full_name) || empty($email)) {
         $error = 'Name and email are required.';
     } else {
-        $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?");
-        $stmt->execute([$name, $email, $phone, $_SESSION['user_id']]);
-        $_SESSION['name'] = $name;
-        $_SESSION['email'] = $email;
+        $stmt = $pdo->prepare("UPDATE admins SET full_name = ?, email = ?, phone = ?, username = ? WHERE id = ?");
+        $stmt->execute([$full_name, $email, $phone, $username, $admin_id]);
+        
+        // Update session
+        $_SESSION['admin_full_name'] = $full_name;
+        $_SESSION['admin_email'] = $email;
+        $_SESSION['admin_username'] = $username;
+        
         $success = 'Profile updated successfully.';
-        $user = getUserById($_SESSION['user_id']);
+        $admin = getAdminById($admin_id);
     }
 }
 
-// Change password
+// Change password - GUNA TABLE ADMINS
 if (isset($_POST['change_password'])) {
     $currentPassword = trim($_POST['current_password']);
     $newPassword = trim($_POST['new_password']);
     $confirmPassword = trim($_POST['confirm_password']);
 
-    if (md5($currentPassword) !== $user['password']) {
+    if ($currentPassword !== $admin['password']) {
         $error = 'Current password is incorrect.';
     } elseif (strlen($newPassword) < 6) {
         $error = 'New password must be at least 6 characters.';
     } elseif ($newPassword !== $confirmPassword) {
         $error = 'New passwords do not match.';
     } else {
-        $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
-        $stmt->execute([md5($newPassword), $_SESSION['user_id']]);
+        $stmt = $pdo->prepare("UPDATE admins SET password = ? WHERE id = ?");
+        $stmt->execute([$newPassword, $admin_id]);
         $success = 'Password changed successfully.';
+        $admin = getAdminById($admin_id);
     }
 }
 
-// Basic activity counts for this admin
+// Basic activity counts
 $totalManagedUsers = getTotalUsers();
 $totalManagedJobs = $pdo->query("SELECT COUNT(*) FROM jobs")->fetchColumn();
+$totalAdmins = countAdmins();
 ?>
 
 <!DOCTYPE html>
@@ -88,7 +97,7 @@ $totalManagedJobs = $pdo->query("SELECT COUNT(*) FROM jobs")->fetchColumn();
         .page-header p { color: #6b7280; font-size: 14px; margin-top: 4px; }
 
         /* Stat mini cards */
-        .profile-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+        .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
         .profile-stat { background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; text-align: center; }
         .profile-stat .number { font-size: 24px; font-weight: 700; color: #1f2937; }
         .profile-stat .label { font-size: 12px; color: #6b7280; }
@@ -159,15 +168,17 @@ $totalManagedJobs = $pdo->query("SELECT COUNT(*) FROM jobs")->fetchColumn();
             <div class="profile-stats">
                 <div class="profile-stat"><div class="number"><?php echo $totalManagedUsers; ?></div><div class="label">Total Users Managed</div></div>
                 <div class="profile-stat"><div class="number"><?php echo $totalManagedJobs; ?></div><div class="label">Total Jobs Managed</div></div>
+                <div class="profile-stat"><div class="number"><?php echo $totalAdmins; ?></div><div class="label">Total Admins</div></div>
             </div>
 
-            <!-- Profile info form -->
+            <!-- Profile info form - GUNA TABLE ADMINS -->
             <div class="panel">
                 <div class="avatar-row">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($user['name']); ?>" alt="Avatar">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($admin['full_name'] ?? $admin['username']); ?>" alt="Avatar">
                     <div>
-                        <div style="font-weight:700;font-size:16px;"><?php echo escape($user['name']); ?></div>
-                        <span class="badge-admin-role">Administrator</span>
+                        <div style="font-weight:700;font-size:16px;"><?php echo escape($admin['full_name'] ?? $admin['username']); ?></div>
+                        <span class="badge-admin-role"><?php echo ucfirst($admin['role'] ?? 'Administrator'); ?></span>
+                        <div style="font-size:12px;color:#6b7280;margin-top:4px;">@<?php echo escape($admin['username']); ?></div>
                     </div>
                 </div>
 
@@ -175,22 +186,28 @@ $totalManagedJobs = $pdo->query("SELECT COUNT(*) FROM jobs")->fetchColumn();
                     <div class="form-grid">
                         <div class="field">
                             <label>Full Name</label>
-                            <input type="text" name="name" value="<?php echo escape($user['name']); ?>" required>
+                            <input type="text" name="full_name" value="<?php echo escape($admin['full_name'] ?? ''); ?>" required>
                         </div>
                         <div class="field">
-                            <label>Email</label>
-                            <input type="email" name="email" value="<?php echo escape($user['email']); ?>" required>
+                            <label>Username</label>
+                            <input type="text" name="username" value="<?php echo escape($admin['username'] ?? ''); ?>" required>
                         </div>
                     </div>
-                    <div class="field">
-                        <label>Phone</label>
-                        <input type="text" name="phone" value="<?php echo escape($user['phone'] ?? ''); ?>" placeholder="+6012 345 6789">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>Email</label>
+                            <input type="email" name="email" value="<?php echo escape($admin['email'] ?? ''); ?>" required>
+                        </div>
+                        <div class="field">
+                            <label>Phone</label>
+                            <input type="text" name="phone" value="<?php echo escape($admin['phone'] ?? ''); ?>" placeholder="+6012 345 6789">
+                        </div>
                     </div>
                     <button type="submit" name="update_profile" class="btn-primary">Save Changes</button>
                 </form>
             </div>
 
-            <!-- Change password form -->
+            <!-- Change password form - GUNA TABLE ADMINS -->
             <div class="panel">
                 <h3 style="margin-bottom:16px;">Change Password</h3>
                 <form method="POST">

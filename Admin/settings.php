@@ -2,8 +2,8 @@
 require_once '../config.php';
 
 // Restrict page to logged in admins only
-if (!isLoggedIn() || !isAdmin()) {
-    redirect('../index.php');
+if (!isAdminLoggedIn()) {
+    redirect('adminlogin.php');
 }
 
 $success = '';

@@ -271,12 +271,11 @@ function getAllUsers() {
 }
 
 /**
- * Get recent users (last 5)
+ * Get recent users (last 5) - FIXED
  */
 function getRecentUsers($limit = 5) {
     global $pdo;
-    $stmt = $pdo->prepare("SELECT * FROM users ORDER BY created_at DESC LIMIT ?");
-    $stmt->execute([$limit]);
+    $stmt = $pdo->query("SELECT * FROM users ORDER BY created_at DESC LIMIT " . (int)$limit);
     return $stmt->fetchAll();
 }
 

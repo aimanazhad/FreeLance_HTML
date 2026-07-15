@@ -13,7 +13,7 @@ $login_error = '';
 
 if (isset($_POST['login'])) {
     $email = trim($_POST['email']);
-    $password = md5(trim($_POST['password']));
+    $password = trim($_POST['password']); // Plain password for demo
     
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
     $stmt->execute([$email, $password]);
@@ -77,6 +77,31 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
             align-items: center;
             gap: 8px;
         }
+        .admin-link {
+            color: #22d3ee !important;
+            font-weight: 600 !important;
+            text-decoration: none !important;
+            transition: color 0.3s;
+        }
+        .admin-link:hover {
+            color: #f472b6 !important;
+            text-decoration: underline !important;
+        }
+        .admin-link-btn {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white !important;
+            font-weight: 600 !important;
+            border-radius: 8px;
+            text-decoration: none !important;
+            transition: all 0.3s;
+        }
+        .admin-link-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
     </style>
 </head>
 <body class="text-gray-300 min-h-screen flex items-center justify-center p-4 md:p-8">
@@ -137,7 +162,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
             <!-- Header section of form -->
             <div>
                 <div class="flex items-center space-x-2 text-xs font-bold tracking-wider text-cyan-400 uppercase mb-1">
-                    <span class="text-gray-400 text-xs">🌐 Freelance Marketplace logo</span>
+                    <span class="text-gray-400 text-xs">🌐 Freelance Marketplace</span>
                 </div>
                 <span class="text-xs font-bold tracking-widest text-cyan-500 uppercase block mb-1">LOGIN</span>
                 <h2 class="text-2xl md:text-3xl font-bold text-white">Log in to your account</h2>
@@ -205,12 +230,15 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
             </div>
 
             <!-- Bottom Links - Navigate to signup.php & Admin -->
-            <div class="text-center space-y-2 pt-2 text-xs">
+            <div class="text-center space-y-3 pt-2 text-xs">
                 <p class="text-gray-400">
                     Don't have an account? <a href="signup.php" class="text-cyan-400 hover:underline font-medium">Create one</a>
                 </p>
                 <p class="text-gray-500">
-                    Are you an administrator? <a href="Admin/adminlogin.php" class="text-cyan-400 hover:underline font-medium">Access Admin Portal</a>
+                    Are you an administrator? 
+                    <a href="Admin/adminlogin.php?force_login=1" class="admin-link-btn">
+                        <i class="fa-solid fa-shield-halved"></i> Access Admin Portal
+                    </a>
                 </p>
             </div>
 

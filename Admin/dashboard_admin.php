@@ -1,9 +1,20 @@
 <?php
 require_once '../config.php';
 
-if (!isLoggedIn() || !isAdmin()) {
-    redirect('../index.php');
+// ============================================
+// CHECK ADMIN LOGIN - WAJIB LOGIN DULU
+// ============================================
+if (!isAdminLoggedIn()) {
+    // Jika belum login, redirect ke admin login
+    header("Location: adminlogin.php");
+    exit;
 }
+
+// ============================================
+// AMBIL DATA ADMIN DARI SESSION
+// ============================================
+$admin_name = $_SESSION['admin_full_name'] ?? 'Admin';
+$admin_id = $_SESSION['admin_id'] ?? 0;
 
 // Get stats from database
 $totalUsers = getTotalUsers();
@@ -401,7 +412,7 @@ $jobsTrend = getMonthlyTrend($pdo, 'jobs');
             <!-- PAGE HEADER -->
             <div class="page-header">
                 <h1>Admin Dashboard</h1>
-                <p>Welcome back, <?php echo escape($_SESSION['name']); ?>! Here's what's happening on your platform today.</p>
+                <p>Welcome back, <?php echo escape($admin_name); ?>! 👋 Here's what's happening on your platform today.</p>
             </div>
 
             <!-- ==========================================
