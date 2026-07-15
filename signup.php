@@ -31,12 +31,12 @@ if (isset($_POST['signup'])) {
         if ($check->rowCount() > 0) {
             $error = "⚠️ Email already registered! Please login.";
         } else {
-            // Hash password
-            $hashed_password = md5($password);
+            // Save password as plain text
+            $plain_password = $password;
             
             // Insert into database
             $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-            if ($stmt->execute([$name, $email, $hashed_password, $role])) {
+            if ($stmt->execute([$name, $email, $plain_password, $role])) {
                 // ✅ REDIRECT KE LOGIN PAGE
                 header('Location: index.php?signup=success');
                 exit();
@@ -57,28 +57,526 @@ if (isset($_POST['signup'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        .message {
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 16px;
+        :root {
+            font-family: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            background: #050816;
+            color: #f8fafc;
+        }
+
+        body {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            padding: 24px;
         }
+
+        .signup-container {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 28px;
+            width: min(1180px, 100%);
+            max-width: 1180px;
+        }
+
+        .banner-panel,
+        .form-panel {
+            border-radius: 32px;
+            overflow: hidden;
+            background: #081025;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            box-shadow: 0 28px 90px rgba(15, 23, 42, 0.35);
+        }
+
+        .banner-panel {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(180deg, #0b132a 0%, #101a38 100%);
+        }
+
+        .banner-panel .illustration-placeholder {
+            width: 100%;
+            max-width: 420px;
+            aspect-ratio: 1 / 1;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(79, 70, 229, 0.1), rgba(15, 23, 42, 0.4));
+            display: grid;
+            place-items: center;
+            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+        }
+
+        .banner-panel .illustration-placeholder svg {
+            width: 90%;
+            height: auto;
+        }
+
+        .banner-panel .brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .banner-panel .brand-title {
+            color: #38bdf8;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .banner-panel h2 {
+            margin: 0;
+            font-size: clamp(2rem, 2.5vw, 3.4rem);
+            line-height: 1.05;
+            letter-spacing: -0.05em;
+            color: #ffffff;
+        }
+
+        .banner-panel p {
+            margin: 24px 0 0;
+            color: #cbd5e1;
+            font-size: 15px;
+            line-height: 1.8;
+            max-width: 420px;
+        }
+
+        .banner-features {
+            display: grid;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .banner-feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .feature-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #38bdf8;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .banner-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+        }
+
+        .banner-chip {
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(15, 23, 42, 0.72);
+            color: #cbd5e1;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .form-panel {
+            padding: 38px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #071028;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 26px;
+        }
+
+        .brand-logo {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #6366f1, #22d3ee);
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            box-shadow: 0 18px 30px rgba(99, 102, 241, 0.24);
+        }
+
+        .brand-text .title-main {
+            font-size: 18px;
+            font-weight: 700;
+            color: #38bdf8;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .brand-text .title-sub {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .form-title h1 {
+            margin: 0;
+            font-size: 2.3rem;
+            line-height: 1.05;
+            color: #f8fafc;
+        }
+
+        .form-title p {
+            margin: 14px 0 0;
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.8;
+            max-width: 380px;
+        }
+
+        .message {
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 14px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .message.error {
-            background: #fef2f2;
-            color: #dc2626;
-            border: 1px solid #fecaca;
+            background: #38181b;
+            color: #fecaca;
+            border: 1px solid #fca5a5;
         }
+
         .message.success {
-            background: #f0fdf4;
-            color: #16a34a;
-            border: 1px solid #bbf7d0;
+            background: #0f172a;
+            color: #7dd3fc;
+            border: 1px solid #38bdf8;
         }
+
         .message i {
             font-size: 16px;
+        }
+
+        form {
+            display: grid;
+            gap: 18px;
+        }
+
+        .input-group {
+            display: grid;
+            gap: 10px;
+        }
+
+        .input-group label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #cbd5e1;
+        }
+
+        .input-group input {
+            width: 100%;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 15px 16px;
+            font-size: 15px;
+            background: #0c1427;
+            color: #e2e8f0;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-group input::placeholder {
+            color: #64748b;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: grid;
+        }
+
+        .password-wrapper .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            pointer-events: none;
+        }
+
+        .password-wrapper input {
+            padding-left: 48px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: rgba(255, 255, 255, 0.06);
+            color: #cbd5e1;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .toggle-password:hover {
+            background: rgba(99, 102, 241, 0.24);
+            color: #f8fafc;
+        }
+
+        .btn-submit,
+        .btn-google,
+        .btn-done {
+            width: 100%;
+            border: none;
+            border-radius: 16px;
+            padding: 16px 18px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-submit {
+            background: linear-gradient(90deg, #6366f1, #22d3ee);
+            color: #ffffff;
+            box-shadow: 0 20px 40px rgba(34, 211, 238, 0.28);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(90deg, #4f46e5, #0ea5e9);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0 16px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .btn-google {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-google svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-google:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .login-redirect {
+            margin-top: 18px;
+            color: #94a3b8;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .login-redirect a {
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .login-redirect a:hover {
+            text-decoration: underline;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.72);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 20;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            width: min(520px, 100%);
+            background: #0c1729;
+            border-radius: 28px;
+            padding: 32px;
+            box-shadow: 0 38px 80px rgba(15, 23, 42, 0.5);
+            position: relative;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            border: none;
+            background: transparent;
+            font-size: 22px;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+
+        .modal-box h2 {
+            margin: 0 0 18px;
+            font-size: 22px;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .role-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .role-option-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 16px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 18px;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .role-option-card:hover {
+            border-color: rgba(56, 189, 248, 0.6);
+            background: rgba(56, 189, 248, 0.08);
+        }
+
+        .role-option-card input {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            border-radius: 50%;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            background: transparent;
+        }
+
+        .role-option-card input:checked {
+            border-color: #38bdf8;
+            background: #38bdf8;
+        }
+
+        .role-option-card .custom-radio {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .role-label {
+            font-size: 15px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-done {
+            width: auto;
+            padding: 14px 24px;
+            background: linear-gradient(90deg, #6366f1, #22d3ee);
+            color: white;
+        }
+
+        @media (max-width: 960px) {
+            .signup-container {
+                grid-template-columns: 1fr;
+            }
+
+            .banner-panel {
+                min-height: 360px;
+                padding: 32px;
+            }
+
+            .form-panel {
+                padding: 32px;
+            }
+        }
+
+        @media (max-width: 620px) {
+            body {
+                padding: 16px;
+            }
+
+            .signup-container {
+                gap: 20px;
+            }
+
+            .banner-panel,
+            .form-panel {
+                border-radius: 24px;
+            }
+
+            .btn-submit,
+            .btn-google,
+            .btn-done {
+                padding: 14px 16px;
+            }
+
+            .role-options {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
