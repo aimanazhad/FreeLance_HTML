@@ -168,7 +168,6 @@ $allFreelancers = $pdo->query("SELECT id, name FROM users WHERE role = 'freelanc
                         <div class="action-buttons">
                             <a href="message_client.php" class="btn-secondary"><i class="fa-regular fa-comment"></i> Message</a>
                             <a href="savedLancer_client.php?remove=<?php echo $f['id']; ?>" class="btn-danger" onclick="return confirm('Remove from saved?')"><i class="fa-regular fa-bookmark"></i> Remove</a>
-                            <a href="#" class="btn-primary" onclick="alert('Hire feature coming soon!')"><i class="fa-solid fa-handshake"></i> Hire Now</a>
                         </div>
                     </article>
                     <?php endforeach; ?>

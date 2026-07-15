@@ -19,11 +19,11 @@ if (isset($_POST['make_payment'])) {
     
     if ($amount > 0 && $job_id && $freelancer_id) {
         $stmt = $pdo->prepare("
-            INSERT INTO payments (user_id, freelancer_id, job_id, amount, method, description, status, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
+            INSERT INTO payments (user_id, freelancer_id, job_id, amount, method, description, status, payment_date, created_at) 
+            VALUES (?, ?, ?, ?, ?, ?, 'paid', NOW(), NOW())
         ");
         if ($stmt->execute([$user_id, $freelancer_id, $job_id, $amount, $method, $description])) {
-            $payment_success = '✅ Payment request submitted! Waiting for admin approval.';
+            $payment_success = '✅ Payment processed successfully.';
         } else {
             $payment_error = '❌ Failed to process payment.';
         }

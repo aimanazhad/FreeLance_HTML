@@ -30,8 +30,7 @@ if (isset($_POST['update_profile'])) {
 }
 
 $totalApplications = $pdo->query("SELECT COUNT(*) FROM applications WHERE freelancer_id = ".$_SESSION['user_id'])->fetchColumn();
-$acceptedApplications = $pdo->query("SELECT COUNT(*) FROM applications WHERE freelancer_id = ".$_SESSION['user_id']." AND status = 'accepted'")->fetchColumn();
-$totalEarnings = $pdo->query("SELECT SUM(amount) FROM payments WHERE user_id = ".$_SESSION['user_id']." AND status = 'paid'")->fetchColumn() ?? 0;
+$totalEarnings = $pdo->query("SELECT SUM(amount) FROM payments WHERE freelancer_id = ".$_SESSION['user_id']." AND status = 'paid'")->fetchColumn() ?? 0;
 ?>
 
 <!DOCTYPE html>
@@ -88,7 +87,7 @@ $totalEarnings = $pdo->query("SELECT SUM(amount) FROM payments WHERE user_id = "
         .hero-banner .emoji { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); font-size: 48px; z-index: 1; }
 
         .profile-stats {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;
         }
         .profile-stat {
             background: white; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; text-align: center;
@@ -194,7 +193,6 @@ $totalEarnings = $pdo->query("SELECT SUM(amount) FROM payments WHERE user_id = "
 
         <div class="profile-stats">
             <div class="profile-stat"><div class="number"><?php echo $totalApplications; ?></div><div class="label">Applications</div></div>
-            <div class="profile-stat"><div class="number"><?php echo $acceptedApplications; ?></div><div class="label">Accepted</div></div>
             <div class="profile-stat"><div class="number">RM <?php echo number_format($totalEarnings, 2); ?></div><div class="label">Earnings</div></div>
         </div>
 

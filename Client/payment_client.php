@@ -62,11 +62,11 @@ if (isset($_POST['make_payment'])) {
         
         if ($check->rowCount() == 0) {
             $stmt = $pdo->prepare("
-                INSERT INTO payments (user_id, freelancer_id, job_id, amount, method, description, status, created_at) 
-                VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())
+                INSERT INTO payments (user_id, freelancer_id, job_id, amount, method, description, status, payment_date, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, 'paid', NOW(), NOW())
             ");
             if ($stmt->execute([$user_id, $freelancer_id, $job_id, $amount, $method, $description])) {
-                $success = '✅ Payment submitted! Waiting for admin approval.';
+                $success = '✅ Payment processed successfully.';
                 
                 // Refresh data
                 $unpaidJobs = $pdo->query("
@@ -132,7 +132,7 @@ $unpaidCount = count($unpaidJobs);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .payment-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; }
+        .payment-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
         .payment-card { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06); }
         .payment-card h3 { margin-top: 0; margin-bottom: 16px; }
         .form-group { margin-bottom: 16px; }
@@ -294,95 +294,6 @@ $unpaidCount = count($unpaidJobs);
             </div>
 
             <div class="payment-grid">
-                <!-- Make Payment Form -->
-                <div class="payment-card">
-                    <h3><i class="fa-solid fa-credit-card" style="color:#6366f1;"></i> Make Payment</h3>
-                    
-                    <?php if ($unpaidCount > 0): ?>
-                        <div class="unpaid-notice">
-                            <i class="fa-solid fa-circle-exclamation"></i>
-                            <span>You have <strong><?php echo $unpaidCount; ?> job(s)</strong> waiting for payment.</span>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <form method="POST" id="paymentForm">
-                        <div class="form-group">
-                            <label>Select Completed Job *</label>
-                            <select name="job_id" id="jobSelect" required onchange="updatePaymentDetails(this)">
-                                <option value="">-- Select a job --</option>
-                                <?php foreach ($unpaidJobs as $job): ?>
-                                    <option value="<?php echo $job['id']; ?>" 
-                                            data-freelancer-id="<?php echo $job['freelancer_id']; ?>"
-                                            data-freelancer-name="<?php echo escape($job['freelancer_name']); ?>"
-                                            data-freelancer-email="<?php echo escape($job['freelancer_email']); ?>"
-                                            data-amount="<?php echo $job['bid_amount'] ?? $job['budget_max']; ?>">
-                                        <?php echo escape($job['title']); ?> 
-                                        (RM <?php echo number_format($job['bid_amount'] ?? $job['budget_max'], 2); ?>)
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        
-                        <!-- Freelancer Info (auto-filled) -->
-                        <div id="freelancerInfo" style="display:none;" class="freelancer-info">
-                            <img id="freelancerAvatar" src="" alt="">
-                            <div>
-                                <div class="name" id="freelancerName"></div>
-                                <div class="email" id="freelancerEmail"></div>
-                            </div>
-                        </div>
-                        
-                        <input type="hidden" name="freelancer_id" id="freelancerId">
-                        
-                        <div class="form-group">
-                            <label>Amount (RM)</label>
-                            <div class="amount-display">
-                                <span class="currency">RM</span> 
-                                <span id="amountDisplay">0.00</span>
-                            </div>
-                            <input type="hidden" name="amount" id="amountInput" value="0">
-                            <input type="range" id="amountRange" min="0" max="0" step="50" 
-                                   oninput="updateAmountSlider(this.value)" style="width:100%;">
-                            <div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-top:4px;">
-                                <span>RM 0</span>
-                                <span id="rangeMax">RM 0</span>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Payment Method</label>
-                            <select name="method" required>
-                                <option value="online">Online Banking</option>
-                                <option value="bank">Bank Transfer</option>
-                                <option value="e-wallet">E-Wallet</option>
-                                <option value="qrcode">QR Code</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Description</label>
-                            <input type="text" name="description" placeholder="Payment for job completion" 
-                                   value="Payment for completed freelance job">
-                        </div>
-                        
-                        <button type="submit" name="make_payment" class="btn-primary" id="payBtn" disabled>
-                            <i class="fa-regular fa-paper-plane"></i> Pay Now
-                        </button>
-                    </form>
-
-                    <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e5e7eb;">
-                        <h4>📱 Quick Payment</h4>
-                        <div class="qr-placeholder">
-                            <div class="qr-icon">QR</div>
-                            <div>
-                                <p style="font-weight:600;margin:0;">Scan to Pay</p>
-                                <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">Use TNG eWallet, Maybank, or any bank app</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Payment History -->
                 <div class="payment-card">
                     <h3><i class="fa-solid fa-clock-rotate-left" style="color:#6366f1;"></i> Payment History</h3>
                     <?php if (count($payments) > 0): ?>
@@ -420,61 +331,6 @@ $unpaidCount = count($unpaidJobs);
             </div>
         </main>
     </div>
-
-    <script>
-        function updatePaymentDetails(select) {
-            const selected = select.options[select.selectedIndex];
-            const freelancerInfo = document.getElementById('freelancerInfo');
-            const freelancerId = document.getElementById('freelancerId');
-            const freelancerName = document.getElementById('freelancerName');
-            const freelancerEmail = document.getElementById('freelancerEmail');
-            const freelancerAvatar = document.getElementById('freelancerAvatar');
-            const amountDisplay = document.getElementById('amountDisplay');
-            const amountInput = document.getElementById('amountInput');
-            const amountRange = document.getElementById('amountRange');
-            const rangeMax = document.getElementById('rangeMax');
-            const payBtn = document.getElementById('payBtn');
-            
-            if (selected.value) {
-                const fId = selected.dataset.freelancerId;
-                const fName = selected.dataset.freelancerName;
-                const fEmail = selected.dataset.freelancerEmail;
-                const amount = parseFloat(selected.dataset.amount) || 0;
-                
-                // Show freelancer info
-                freelancerInfo.style.display = 'flex';
-                freelancerId.value = fId;
-                freelancerName.textContent = fName;
-                freelancerEmail.textContent = fEmail;
-                freelancerAvatar.src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + encodeURIComponent(fName);
-                
-                // Update amount
-                amountDisplay.textContent = amount.toFixed(2);
-                amountInput.value = amount;
-                amountRange.max = amount;
-                amountRange.value = amount;
-                rangeMax.textContent = 'RM ' + amount.toFixed(2);
-                
-                // Enable pay button
-                payBtn.disabled = false;
-            } else {
-                freelancerInfo.style.display = 'none';
-                freelancerId.value = '';
-                amountDisplay.textContent = '0.00';
-                amountInput.value = 0;
-                amountRange.max = 0;
-                amountRange.value = 0;
-                rangeMax.textContent = 'RM 0';
-                payBtn.disabled = true;
-            }
-        }
-        
-        function updateAmountSlider(value) {
-            const amountDisplay = document.getElementById('amountDisplay');
-            const amountInput = document.getElementById('amountInput');
-            amountDisplay.textContent = parseFloat(value).toFixed(2);
-            amountInput.value = value;
-        }
-    </script>
 </body>
+</html>
 </html>

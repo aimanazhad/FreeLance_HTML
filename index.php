@@ -7,13 +7,13 @@ if (isset($_GET['logout'])) {
 }
 
 // ============================================
-// LOGIN PROCESS
+// LOGIN PROCESS (PLAIN PASSWORD - NO ENCRYPTION)
 // ============================================
 $login_error = '';
 
 if (isset($_POST['login'])) {
     $email = trim($_POST['email']);
-    $password = trim($_POST['password']); // Plain password for demo
+    $password = trim($_POST['password']); // TANPA md5()
     
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
     $stmt->execute([$email, $password]);

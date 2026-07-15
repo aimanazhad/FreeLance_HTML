@@ -19,13 +19,15 @@ $payments = $pdo->query("
     ORDER BY p.created_at DESC
 ")->fetchAll();
 
-$balance = $pdo->query("SELECT SUM(amount) FROM payments WHERE freelancer_id = $user_id AND status = 'paid'")->fetchColumn() ?? 0;
+$paidBalance = $pdo->query("SELECT SUM(amount) FROM payments WHERE freelancer_id = $user_id AND status = 'paid'")->fetchColumn() ?? 0;
 $pendingBalance = $pdo->query("SELECT SUM(amount) FROM payments WHERE freelancer_id = $user_id AND status = 'pending'")->fetchColumn() ?? 0;
+$availableBalance = $paidBalance + $pendingBalance;
+$pendingDisplay = $pendingBalance < 0 ? abs($pendingBalance) : $pendingBalance;
 
 // Process withdrawal
 if (isset($_POST['withdraw'])) {
     $amount = $_POST['amount'];
-    if ($amount > 0 && $amount <= $balance) {
+    if ($amount > 0 && $amount <= $availableBalance) {
         $stmt = $pdo->prepare("INSERT INTO payments (user_id, freelancer_id, amount, method, description, status) VALUES (?, ?, ?, 'bank', 'Withdrawal', 'pending')");
         $stmt->execute([$_SESSION['user_id'], $user_id, -$amount]);
         redirect('earnings.php?success=withdrawn');
@@ -235,7 +237,7 @@ if (isset($_POST['withdraw'])) {
         <div class="earnings-hero">
             <div>
                 <div class="label">Current Balance</div>
-                <div class="value">RM <?php echo number_format($balance, 2); ?></div>
+                <div class="value">RM <?php echo number_format($availableBalance, 2); ?></div>
             </div>
             <button class="btn-withdraw" onclick="document.getElementById('withdrawModal').classList.add('show')">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Withdraw
@@ -245,11 +247,11 @@ if (isset($_POST['withdraw'])) {
         <!-- STATS -->
         <div class="earnings-stats">
             <div class="earnings-stat-card">
-                <div class="number green">RM <?php echo number_format($balance, 2); ?></div>
+                <div class="number green">RM <?php echo number_format($availableBalance, 2); ?></div>
                 <div class="label">Available Balance</div>
             </div>
             <div class="earnings-stat-card">
-                <div class="number yellow">RM <?php echo number_format($pendingBalance, 2); ?></div>
+                <div class="number yellow">RM <?php echo number_format($pendingDisplay, 2); ?></div>
                 <div class="label">Pending Clearance</div>
             </div>
         </div>
@@ -296,9 +298,9 @@ if (isset($_POST['withdraw'])) {
         <div class="modal-overlay" id="withdrawModal" onclick="if(event.target===this)this.classList.remove('show')">
             <div class="modal-box">
                 <h3>Withdraw Earnings</h3>
-                <p>Current Balance: RM <?php echo number_format($balance, 2); ?></p>
+                <p>Current Balance: RM <?php echo number_format($availableBalance, 2); ?></p>
                 <form method="POST">
-                    <input type="number" name="amount" placeholder="Amount (RM)" min="1" max="<?php echo $balance; ?>" step="0.01" required>
+                    <input type="number" name="amount" placeholder="Amount (RM)" min="1" max="<?php echo $availableBalance; ?>" step="0.01" required>
                     <div class="modal-actions">
                         <button type="button" class="btn-outline" onclick="document.getElementById('withdrawModal').classList.remove('show')">Cancel</button>
                         <button type="submit" name="withdraw" class="btn-primary">Withdraw</button>

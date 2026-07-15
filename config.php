@@ -280,13 +280,15 @@ function getRecentUsers($limit = 5) {
 }
 
 /**
- * Create a new user (plain password for demo)
+* Create a new user (PLAIN PASSWORD - NO ENCRYPTION)
  */
 function createUser($name, $email, $password, $role = 'client') {
     global $pdo;
+    // Password disimpan terus - TANPA encryption
     $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
     return $stmt->execute([$name, $email, $password, $role]);
 }
+
 
 /**
  * Update user
@@ -326,10 +328,11 @@ function emailExists($email) {
 }
 
 /**
- * Login user (plain password for demo)
+* Login user (PLAIN PASSWORD - NO ENCRYPTION)
  */
 function loginUser($email, $password) {
     global $pdo;
+    // Bandingkan password terus - TANPA encryption
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
     $stmt->execute([$email, $password]);
     return $stmt->fetch();

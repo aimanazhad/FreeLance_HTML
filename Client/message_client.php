@@ -14,8 +14,80 @@ $messages = $pdo->query("
     FROM messages m
     JOIN users u ON m.sender_id = u.id
     WHERE m.receiver_id = $user_id OR m.sender_id = $user_id
-    ORDER BY m.created_at DESC
+    ORDER BY m.created_at ASC
 ")->fetchAll();
+
+// Build conversation list
+$conversations = [];
+$contactIds = [];
+foreach ($messages as $msg) {
+    $otherId = $msg['sender_id'] == $user_id ? $msg['receiver_id'] : $msg['sender_id'];
+    $contactIds[$otherId] = true;
+}
+
+$contactMap = [];
+if (!empty($contactIds)) {
+    $contactIdsList = implode(',', array_keys($contactIds));
+    $contacts = $pdo->query("SELECT id, name, role FROM users WHERE id IN ($contactIdsList)")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($contacts as $contact) {
+        $contactMap[$contact['id']] = $contact;
+    }
+}
+
+foreach ($messages as $msg) {
+    $otherId = $msg['sender_id'] == $user_id ? $msg['receiver_id'] : $msg['sender_id'];
+    if (!isset($conversations[$otherId])) {
+        $conversations[$otherId] = [
+            'id' => $otherId,
+            'name' => $contactMap[$otherId]['name'] ?? 'Unknown',
+            'role' => $contactMap[$otherId]['role'] ?? 'Freelancer',
+            'last_message' => '',
+            'last_time' => '',
+            'unread' => 0
+        ];
+    }
+    $conversations[$otherId]['last_message'] = $msg['message'];
+    $conversations[$otherId]['last_time'] = $msg['created_at'];
+    if ($msg['receiver_id'] == $user_id && !$msg['is_read']) {
+        $conversations[$otherId]['unread']++;
+    }
+}
+
+$conversations = array_values($conversations);
+usort($conversations, function($a, $b) {
+    return strtotime($b['last_time']) - strtotime($a['last_time']);
+});
+
+// Determine selected contact
+$selectedContactId = isset($_GET['contact']) && is_numeric($_GET['contact']) ? intval($_GET['contact']) : null;
+if (!$selectedContactId && !empty($conversations)) {
+    $selectedContactId = $conversations[0]['id'];
+}
+
+// Mark messages as read when a conversation is opened
+if ($selectedContactId) {
+    $markRead = $pdo->prepare("UPDATE messages SET is_read = 1 WHERE sender_id = ? AND receiver_id = ? AND is_read = 0");
+    $markRead->execute([$selectedContactId, $user_id]);
+    foreach ($conversations as &$conversation) {
+        if ($conversation['id'] == $selectedContactId) {
+            $conversation['unread'] = 0;
+            break;
+        }
+    }
+    unset($conversation);
+}
+
+$selectedConversation = [];
+if ($selectedContactId) {
+    foreach ($messages as $msg) {
+        $otherId = $msg['sender_id'] == $user_id ? $msg['receiver_id'] : $msg['sender_id'];
+        if ($otherId == $selectedContactId) {
+            $selectedConversation[] = $msg;
+        }
+    }
+}
+
+$selectedContact = $selectedContactId ? ($contactMap[$selectedContactId] ?? null) : null;
 
 // Send message
 if (isset($_POST['send_message'])) {
@@ -26,7 +98,7 @@ if (isset($_POST['send_message'])) {
     if (!empty($message) && !empty($receiver_id)) {
         $stmt = $pdo->prepare("INSERT INTO messages (sender_id, receiver_id, job_id, message) VALUES (?, ?, ?, ?)");
         $stmt->execute([$user_id, $receiver_id, $job_id, $message]);
-        redirect('message_client.php?success=sent');
+        redirect('message_client.php?success=sent&contact=' . intval($receiver_id));
     }
 }
 
@@ -46,29 +118,50 @@ $freelancers = $pdo->query("SELECT id, name FROM users WHERE role = 'freelancer'
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .messages-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        .conversation-list { display: flex; flex-direction: column; gap: 12px; }
-        .conversation-card { display: flex; align-items: flex-start; gap: 14px; padding: 16px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; cursor: pointer; }
-        .conversation-card:hover { border-color: #6366f1; }
-        .conversation-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
-        .conversation-content { flex: 1; }
-        .conversation-name { font-weight: 700; font-size: 15px; }
-        .conversation-time { font-size: 12px; color: #6b7280; float: right; }
-        .conversation-snippet { font-size: 13px; color: #6b7280; margin-top: 4px; }
-        .compose-form { background: #fff; border-radius: 16px; padding: 20px; border: 1px solid #e5e7eb; }
-        .compose-form .form-group { margin-bottom: 12px; }
-        .compose-form label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-        .compose-form input, .compose-form select, .compose-form textarea { width: 100%; padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; background: white; }
-        .compose-form textarea { min-height: 80px; resize: vertical; }
-        .btn-send { background: #6366f1; color: white; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; }
-        .btn-send:hover { background: #4f46e5; }
-        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
-        .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-        .badge-unread { background: #fef2f2; color: #dc2626; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-        .badge-read { background: #f0fdf4; color: #22c55e; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-        .message-preview { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-        .page-header h1 { font-size: 28px; font-weight: 800; color: #1f2937; }
+        .messages-layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+        .conversations-panel, .chat-panel { background: #fff; border-radius: 24px; border: 1px solid #e5e7eb; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06); }
+        .conversations-panel { display: flex; flex-direction: column; overflow: hidden; }
+        .conversations-header { padding: 22px 24px; border-bottom: 1px solid #eef2ff; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .conversations-header h2 { margin: 0; font-size: 18px; font-weight: 700; }
+        .conversation-list { display: flex; flex-direction: column; overflow-y: auto; max-height: calc(100vh - 220px); }
+        .conversation-card { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; cursor: pointer; text-decoration: none; color: inherit; }
+        .conversation-card:last-child { border-bottom: none; }
+        .conversation-card.active, .conversation-card:hover { background: #f8f4ff; }
+        .conversation-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .conversation-content { flex: 1; min-width: 0; }
+        .conversation-name { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-weight: 700; font-size: 14px; }
+        .conversation-time { font-size: 11px; color: #9ca3af; white-space: nowrap; }
+        .conversation-snippet { font-size: 13px; color: #6b7280; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .conversation-meta { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+        .conversation-role { font-size: 11px; color: #6b7280; }
+        .badge-unread { background: #6366f1; color: white; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+        .chat-panel { display: flex; flex-direction: column; min-height: 600px; }
+        .chat-header { padding: 22px 24px; border-bottom: 1px solid #eef2ff; display: flex; align-items: center; gap: 16px; }
+        .chat-header .avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; }
+        .chat-header .chat-title { display: flex; flex-direction: column; }
+        .chat-header .chat-title h2 { margin: 0; font-size: 18px; font-weight: 700; }
+        .chat-header .chat-title span { font-size: 13px; color: #6b7280; }
+        .chat-messages { flex: 1; padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; background: #f8f7ff; }
+        .message-row { display: flex; gap: 10px; align-items: flex-end; }
+        .message-row.from-me { justify-content: flex-end; }
+        .message-bubble { max-width: 70%; padding: 14px 18px; border-radius: 22px; background: white; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06); position: relative; }
+        .message-row.from-me .message-bubble { background: #6366f1; color: white; }
+        .message-row .message-meta { font-size: 11px; color: #9ca3af; margin-top: 6px; text-align: right; }
+        .chat-empty { padding: 40px; text-align: center; color: #6b7280; }
+        .chat-empty h3 { margin-bottom: 12px; font-size: 18px; }
+        .chat-input { padding: 16px 24px; border-top: 1px solid #eef2ff; background: white; }
+        .chat-input form { display: flex; gap: 12px; align-items: center; }
+        .chat-input textarea { flex: 1; min-height: 48px; border-radius: 999px; border: 1px solid #e5e7eb; padding: 14px 16px; resize: none; font-size: 14px; }
+        .chat-input button { background: #6366f1; color: white; border: none; border-radius: 999px; padding: 14px 20px; cursor: pointer; font-weight: 700; }
+        .chat-input button:hover { background: #4f46e5; }
+        .chat-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+        .chat-create { padding: 20px; border-bottom: 1px solid #eef2ff; }
+        .chat-create label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+        .chat-create select, .chat-create textarea { width: 100%; padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 12px; font-size: 14px; background: white; }
+        .chat-create textarea { min-height: 120px; resize: vertical; }
+        .chat-create button { margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; }
+        @media (max-width: 1024px) { .messages-layout { grid-template-columns: 1fr; } .conversations-panel { max-height: 520px; } }
+        @media (max-width: 600px) { .chat-input form { flex-direction: column; } .chat-input button { width: 100%; } }
     </style>
 </head>
 <body class="client-dashboard-body">
@@ -128,11 +221,44 @@ $freelancers = $pdo->query("SELECT id, name FROM users WHERE role = 'freelancer'
             <?php endif; ?>
 
             <div class="messages-layout">
-                <!-- Compose -->
-                <div class="compose-form">
-                    <h3 style="margin-top:0;margin-bottom:16px;"><i class="fa-regular fa-pen-to-square" style="color:#6366f1;"></i> New Message</h3>
-                    <form method="POST">
-                        <div class="form-group">
+                <div class="conversations-panel">
+                    <div class="conversations-header">
+                        <div>
+                            <h2>Chats</h2>
+                            <span style="font-size:13px;color:#6b7280;">Recent conversations</span>
+                        </div>
+                        <a href="#new-chat" class="btn-send" style="padding:10px 16px;font-size:13px;">New</a>
+                    </div>
+                    <div class="conversation-list">
+                        <?php if (count($conversations) > 0): ?>
+                            <?php foreach ($conversations as $conversation): ?>
+                                <a href="message_client.php?contact=<?php echo $conversation['id']; ?>" class="conversation-card<?php echo $selectedContactId == $conversation['id'] ? ' active' : ''; ?>">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($conversation['name']); ?>" alt="" class="conversation-avatar">
+                                    <div class="conversation-content">
+                                        <div class="conversation-name">
+                                            <span><?php echo escape($conversation['name']); ?></span>
+                                            <span class="conversation-time"><?php echo date('h:i A', strtotime($conversation['last_time'])); ?></span>
+                                        </div>
+                                        <div class="conversation-snippet"><?php echo strlen($conversation['last_message']) > 60 ? substr(escape($conversation['last_message']), 0, 60) . '...' : escape($conversation['last_message']); ?></div>
+                                        <div class="conversation-meta">
+                                            <span class="conversation-role"><?php echo escape($conversation['role']); ?></span>
+                                            <?php if ($conversation['unread'] > 0): ?>
+                                                <span class="badge-unread"><?php echo $conversation['unread']; ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="chat-empty">
+                                <h3>No conversations yet</h3>
+                                <p>Start a chat by selecting a freelancer below.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="chat-create" id="new-chat">
+                        <h3 style="margin-top:0;margin-bottom:14px;font-size:16px;color:#111827;">Start new message</h3>
+                        <form method="POST">
                             <label>To</label>
                             <select name="receiver_id" required>
                                 <option value="">Select freelancer...</option>
@@ -140,35 +266,58 @@ $freelancers = $pdo->query("SELECT id, name FROM users WHERE role = 'freelancer'
                                     <option value="<?php echo $f['id']; ?>"><?php echo escape($f['name']); ?></option>
                                 <?php endforeach; ?>
                             </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Message</label>
+                            <label style="margin-top:12px;">Message</label>
                             <textarea name="message" placeholder="Type your message..." required></textarea>
-                        </div>
-                        <button type="submit" name="send_message" class="btn-send"><i class="fa-regular fa-paper-plane"></i> Send</button>
-                    </form>
+                            <button type="submit" name="send_message" class="btn-send"><i class="fa-regular fa-paper-plane"></i> Send</button>
+                        </form>
+                    </div>
                 </div>
 
-                <!-- Messages List -->
-                <div class="conversation-list">
-                    <?php foreach ($messages as $msg): ?>
-                    <div class="conversation-card">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($msg['sender_name']); ?>" alt="" class="conversation-avatar">
-                        <div class="conversation-content">
-                            <div class="conversation-name">
-                                <?php echo escape($msg['sender_name']); ?>
-                                <span class="conversation-time"><?php echo date('d M Y, h:i A', strtotime($msg['created_at'])); ?></span>
-                            </div>
-                            <span style="font-size:12px;color:#6b7280;"><?php echo $msg['sender_role']; ?></span>
-                            <div class="conversation-snippet">
-                                <?php echo strlen($msg['message']) > 60 ? substr(escape($msg['message']), 0, 60) . '...' : escape($msg['message']); ?>
+                <div class="chat-panel">
+                    <?php if ($selectedContact): ?>
+                        <div class="chat-header">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($selectedContact['name']); ?>" alt="" class="avatar">
+                            <div class="chat-title">
+                                <h2><?php echo escape($selectedContact['name']); ?></h2>
+                                <span><?php echo escape($selectedContact['role']); ?></span>
                             </div>
                         </div>
-                        <?php if (!$msg['is_read'] && $msg['receiver_id'] == $user_id): ?>
-                            <span class="badge-unread">New</span>
-                        <?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
+                        <div class="chat-messages">
+                            <?php if (count($selectedConversation) > 0): ?>
+                                <?php foreach ($selectedConversation as $msg): ?>
+                                    <div class="message-row<?php echo $msg['sender_id'] == $user_id ? ' from-me' : ''; ?>">
+                                        <?php if ($msg['sender_id'] != $user_id): ?>
+                                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($selectedContact['name']); ?>" alt="" class="conversation-avatar">
+                                        <?php endif; ?>
+                                        <div class="message-bubble">
+                                            <?php echo escape($msg['message']); ?>
+                                            <div class="message-meta"><?php echo date('d M, h:i A', strtotime($msg['created_at'])); ?></div>
+                                        </div>
+                                        <?php if ($msg['sender_id'] == $user_id): ?>
+                                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($_SESSION['name']); ?>" alt="" class="conversation-avatar">
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="chat-empty">
+                                    <h3>Start the conversation</h3>
+                                    <p>Send a message to <?php echo escape($selectedContact['name']); ?> to begin chatting.</p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="chat-input">
+                            <form method="POST">
+                                <input type="hidden" name="receiver_id" value="<?php echo $selectedContact['id']; ?>">
+                                <textarea name="message" placeholder="Type a message..." required></textarea>
+                                <button type="submit" name="send_message"><i class="fa-regular fa-paper-plane"></i> Send</button>
+                            </form>
+                        </div>
+                    <?php else: ?>
+                        <div class="chat-empty">
+                            <h3>Select a chat</h3>
+                            <p>Pick a conversation from the list or start a new message.</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </main>
