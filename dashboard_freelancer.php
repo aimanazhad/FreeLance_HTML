@@ -1,58 +1,32 @@
 <?php
-require_once '../config.php';
+require_once 'config.php';
 
 if (!isLoggedIn() || !isFreelancer()) {
-    redirect('../index.php');
+    redirect('index.php');
 }
 
 $user_id = $_SESSION['user_id'];
 
-// Generate CSRF Token if not already set (ensure this is configured in config.php)
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+// Get stats
+$totalJobs = $pdo->query("SELECT COUNT(*) FROM jobs WHERE status = 'active'")->fetchColumn();
+$applicationsSent = $pdo->query("SELECT COUNT(*) FROM applications WHERE freelancer_id = $user_id")->fetchColumn();
+$inProgress = $pdo->query("SELECT COUNT(*) FROM applications WHERE freelancer_id = $user_id AND status = 'in_progress'")->fetchColumn();
+$totalEarnings = $pdo->query("SELECT SUM(amount) FROM payments WHERE user_id = $user_id AND status = 'paid'")->fetchColumn() ?? 0;
 
-try {
-    // 1. Get Stats using secure Prepared Statements
-    $stmtJobs = $pdo->prepare("SELECT COUNT(*) FROM jobs WHERE status = 'active'");
-    $stmtJobs->execute();
-    $totalJobs = $stmtJobs->fetchColumn();
+// Get recommended jobs
+$recommendedJobs = $pdo->query("SELECT * FROM jobs WHERE status = 'active' ORDER BY created_at DESC LIMIT 4")->fetchAll();
 
-    $stmtApps = $pdo->prepare("SELECT COUNT(*) FROM applications WHERE freelancer_id = :user_id");
-    $stmtApps->execute(['user_id' => $user_id]);
-    $applicationsSent = $stmtApps->fetchColumn();
-
-    $stmtProgress = $pdo->prepare("SELECT COUNT(*) FROM applications WHERE freelancer_id = :user_id AND status = 'in_progress'");
-    $stmtProgress->execute(['user_id' => $user_id]);
-    $inProgress = $stmtProgress->fetchColumn();
-
-    $stmtEarnings = $pdo->prepare("SELECT SUM(amount) FROM payments WHERE user_id = :user_id AND status = 'paid'");
-    $stmtEarnings->execute(['user_id' => $user_id]);
-    $totalEarnings = $stmtEarnings->fetchColumn() ?? 0;
-
-    // 2. Get Recommended Jobs
-    $stmtRec = $pdo->prepare("SELECT * FROM jobs WHERE status = 'active' ORDER BY created_at DESC LIMIT 4");
-    $stmtRec->execute();
-    $recommendedJobs = $stmtRec->fetchAll();
-
-    // 3. Get Applications Status
-    $stmtAppStatus = $pdo->prepare("
-        SELECT a.*, j.title as job_title, u.name as client_name 
-        FROM applications a
-        JOIN jobs j ON a.job_id = j.id
-        JOIN users u ON j.client_id = u.id
-        WHERE a.freelancer_id = :user_id
-        ORDER BY a.id DESC LIMIT 4
-    ");
-    $stmtAppStatus->execute(['user_id' => $user_id]);
-    $applications = $stmtAppStatus->fetchAll();
-
-} catch (PDOException $e) {
-    // Log error securely and show a user-friendly message
-    error_log("Dashboard query error: " . $e->getMessage());
-    die("An error occurred while loading your dashboard. Please try again later.");
-}
+// Get applications status
+$applications = $pdo->query("
+    SELECT a.*, j.title as job_title, u.name as client_name 
+    FROM applications a
+    JOIN jobs j ON a.job_id = j.id
+    JOIN users u ON j.client_id = u.id
+    WHERE a.freelancer_id = $user_id
+    ORDER BY a.applied_at DESC LIMIT 4
+")->fetchAll();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -151,22 +125,26 @@ try {
             font-size: 16px;
         }
 
-        .sidebar .menu a:hover, .sidebar .menu a.active {
+        .sidebar .menu a:hover {
+            background: #f5f3ff;
+            color: #6366f1;
+        }
+
+        .sidebar .menu a:hover i {
+            color: #6366f1;
+        }
+
+        .sidebar .menu a.active {
             background: #eef2ff;
             color: #6366f1;
             font-weight: 600;
         }
 
-        .sidebar .menu a:hover i, .sidebar .menu a.active i {
+        .sidebar .menu a.active i {
             color: #6366f1;
         }
 
-        .sidebar .logout-btn {
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
+        .sidebar .logout {
             margin-top: 20px;
             padding-top: 16px;
             border-top: 1px solid #e5e7eb;
@@ -175,36 +153,191 @@ try {
             gap: 12px;
             color: #ef4444;
             font-weight: 600;
+            text-decoration: none;
             padding: 10px 14px;
             border-radius: 10px;
             transition: all 0.2s ease;
             font-size: 14px;
         }
 
-        .sidebar .logout-btn i {
+        .sidebar .logout i {
             width: 20px;
             text-align: center;
         }
 
-        .sidebar .logout-btn:hover {
+        .sidebar .logout:hover {
             background: #fef2f2;
             color: #dc2626;
         }
 
         /* ============================================
-           CONTENT & PANELS
+           CONTENT
         ============================================ */
         .content {
             flex: 1;
             min-width: 0;
         }
 
+        /* ============================================
+           TOP NAVIGATION
+        ============================================ */
+        .top-nav {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 32px;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .nav-logo i {
+            color: #6366f1;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 24px;
+        }
+
+        .nav-links a {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #64748b;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .nav-links a.active {
+            background: #eef2ff;
+            color: #6366f1;
+            font-weight: 600;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notification-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #e5e7eb;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .notification-btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 6px 12px 6px 6px;
+            border-radius: 50px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .profile-dropdown:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .profile-role {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .dropdown-arrow {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* ============================================
+           MAIN CONTENT
+        ============================================ */
         .main-content {
             max-width: 1280px;
             margin: 0 auto;
             padding: 32px 32px 60px;
         }
 
+        /* ============================================
+           WELCOME BANNER
+        ============================================ */
         .welcome-banner {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             border-radius: 16px;
@@ -216,6 +349,17 @@ try {
             align-items: center;
             position: relative;
             overflow: hidden;
+        }
+
+        .welcome-banner::after {
+            content: '';
+            position: absolute;
+            right: -60px;
+            top: -60px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
         }
 
         .welcome-banner h1 {
@@ -231,6 +375,8 @@ try {
 
         .welcome-banner .emoji {
             font-size: 48px;
+            position: relative;
+            z-index: 1;
         }
 
         /* ============================================
@@ -333,8 +479,12 @@ try {
             text-decoration: none;
         }
 
+        .panel-header a:hover {
+            text-decoration: underline;
+        }
+
         /* ============================================
-           JOB ITEMS (Form-based action for security)
+           JOB ITEMS
         ============================================ */
         .job-item {
             display: flex;
@@ -361,6 +511,9 @@ try {
         }
 
         .icon-yellow { background: #fef9c3; color: #a16207; }
+        .icon-blue { background: #dbeafe; color: #1d4ed8; }
+        .icon-green { background: #d1fae5; color: #047857; }
+        .icon-red { background: #fee2e2; color: #dc2626; }
 
         .job-info {
             flex: 1;
@@ -404,7 +557,12 @@ try {
             color: #10b981;
         }
 
-        .btn-apply-submit {
+        .job-days {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .btn-apply {
             background: #6366f1;
             color: white;
             border: none;
@@ -413,10 +571,11 @@ try {
             font-weight: 600;
             font-size: 12px;
             cursor: pointer;
+            text-decoration: none;
             transition: all 0.2s ease;
         }
 
-        .btn-apply-submit:hover {
+        .btn-apply:hover {
             background: #4f46e5;
         }
 
@@ -468,19 +627,105 @@ try {
         .text-red { color: #ef4444; }
         .text-green { color: #10b981; }
 
-        /* Responsive Breakpoints */
+        /* ============================================
+           RESPONSIVE
+        ============================================ */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #1e293b;
+            cursor: pointer;
+            padding: 4px;
+        }
+
         @media (max-width: 1024px) {
-            .sidebar { display: none; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .two-col { grid-template-columns: 1fr; }
+            .sidebar {
+                display: none;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .two-col {
+                grid-template-columns: 1fr;
+            }
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 68px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 16px;
+                border-bottom: 1px solid #e5e7eb;
+                box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+            }
+            .nav-links.open {
+                display: flex;
+            }
+            .nav-links a {
+                width: 100%;
+                padding: 10px 16px;
+            }
+            .mobile-menu-btn {
+                display: flex !important;
+            }
         }
+
         @media (max-width: 768px) {
-            .main-content { padding: 16px; }
-            .welcome-banner { padding: 24px; flex-direction: column; text-align: center; }
-            .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .top-nav {
+                padding: 0 16px;
+                height: 60px;
+            }
+            .main-content {
+                padding: 16px;
+            }
+            .welcome-banner {
+                padding: 24px;
+                flex-direction: column;
+                text-align: center;
+            }
+            .welcome-banner .emoji {
+                margin-top: 12px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .stat-card {
+                padding: 16px;
+            }
+            .profile-name {
+                display: none;
+            }
+            .profile-role {
+                display: none;
+            }
         }
+
         @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: 1fr; }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .welcome-banner h1 {
+                font-size: 22px;
+            }
+            .job-item {
+                flex-wrap: wrap;
+            }
+            .job-right {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                padding-top: 8px;
+            }
+            .status-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
         }
     </style>
 </head>
@@ -488,7 +733,9 @@ try {
 
 <div class="app-shell">
 
-    <!-- SIDEBAR -->
+    <!-- ==========================================
+    SIDEBAR
+    ========================================== -->
     <aside class="sidebar">
         <div class="brand">
             <div>
@@ -506,18 +753,16 @@ try {
             <a href="profile.php"><i class="fa-solid fa-user"></i> Profile</a>
             <a href="settings_freelancer.php"><i class="fa-solid fa-gear"></i> Settings</a>
         </nav>
-        
-        <!-- SECURE LOGOUT FORM (POST method avoids CSRF) -->
-        <form action="logout.php" method="POST" onsubmit="return confirm('Are you sure you want to logout?')">
-            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-            <button type="submit" class="sidebar.logout-btn" style="width: 100%; border: none; background: none;">
-                <i class="fa-solid fa-right-from-bracket"></i> Log out
-            </button>
-        </form>
+        <a href="index.php?logout=1" class="logout" onclick="return confirm('Are you sure you want to logout?')">
+            <i class="fa-solid fa-right-from-bracket"></i> Log out
+        </a>
     </aside>
 
-    <!-- CONTENT -->
+    <!-- ==========================================
+    CONTENT
+    ========================================== -->
     <div class="content">
+
         <main class="main-content">
 
             <!-- WELCOME BANNER -->
@@ -533,19 +778,19 @@ try {
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="icon icon-purple"><i class="fa-solid fa-briefcase"></i></div>
-                    <div class="number"><?php echo (int)$totalJobs; ?></div>
+                    <div class="number"><?php echo $totalJobs; ?></div>
                     <div class="label">Available Jobs</div>
                     <a href="browse_jobs.php" class="link">View all jobs →</a>
                 </div>
                 <div class="stat-card">
                     <div class="icon icon-blue"><i class="fa-solid fa-file-invoice"></i></div>
-                    <div class="number"><?php echo (int)$applicationsSent; ?></div>
+                    <div class="number"><?php echo $applicationsSent; ?></div>
                     <div class="label">Applications Sent</div>
                     <a href="my_applications.php" class="link">View my applications →</a>
                 </div>
                 <div class="stat-card">
                     <div class="icon icon-green"><i class="fa-solid fa-clock"></i></div>
-                    <div class="number"><?php echo (int)$inProgress; ?></div>
+                    <div class="number"><?php echo $inProgress; ?></div>
                     <div class="label">In Progress</div>
                     <a href="my_applications.php" class="link">View projects →</a>
                 </div>
@@ -568,23 +813,16 @@ try {
                     </div>
                     <?php foreach ($recommendedJobs as $job): ?>
                     <div class="job-item">
-                        <div class="job-icon icon-yellow"><?php echo escape(strtoupper(substr($job['title'], 0, 1))); ?></div>
+                        <div class="job-icon icon-yellow"><?php echo strtoupper(substr($job['title'], 0, 1)); ?></div>
                         <div class="job-info">
                             <div class="title"><?php echo escape($job['title']); ?></div>
                             <div class="meta"><?php echo escape($job['category']); ?></div>
                             <div class="budget">RM <?php echo number_format($job['budget_min'], 2); ?> - RM <?php echo number_format($job['budget_max'], 2); ?></div>
                         </div>
                         <div class="job-right">
-                            <span class="pill pill-remote"><?php echo escape(ucfirst($job['location_type'])); ?></span>
-                            <!-- Mock days left element placeholder -->
-                            <span class="job-days">New</span>
-                            
-                            <!-- SECURE POST FORM FOR APPLYING -->
-                            <form action="apply_action.php" method="POST" onsubmit="return confirm('Apply for this job?')">
-                                <input type="hidden" name="job_id" value="<?php echo (int)$job['id']; ?>">
-                                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                                <button type="submit" class="btn-apply-submit">Apply</button>
-                            </form>
+                            <span class="pill pill-remote"><?php echo ucfirst($job['location_type']); ?></span>
+                            <span class="job-days"><?php echo rand(1, 10); ?> days left</span>
+                            <a href="browse_jobs.php?apply=<?php echo $job['id']; ?>" class="btn-apply" onclick="return confirm('Apply for this job?')">Apply</a>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -596,19 +834,17 @@ try {
                         <h3>📋 My Application Status</h3>
                         <a href="my_applications.php">View all →</a>
                     </div>
-                    <?php foreach ($applications as $app): 
-                        $statusClass = $app['status'] == 'in_progress' ? 'yellow' : ($app['status'] == 'accepted' ? 'green' : ($app['status'] == 'rejected' ? 'red' : 'blue'));
-                    ?>
-                    <div class="status-item border-<?php echo $statusClass; ?>">
+                    <?php foreach ($applications as $app): ?>
+                    <div class="status-item border-<?php echo $app['status'] == 'in_progress' ? 'yellow' : ($app['status'] == 'accepted' ? 'green' : ($app['status'] == 'rejected' ? 'red' : 'blue')); ?>">
                         <div>
                             <div class="title"><?php echo escape($app['job_title']); ?></div>
                             <div class="client">Client: <?php echo escape($app['client_name']); ?></div>
                         </div>
                         <div style="text-align:right;">
-                            <div class="status-label text-<?php echo $statusClass; ?>">
-                                <?php echo escape(ucfirst(str_replace('_', ' ', $app['status']))); ?>
+                            <div class="status-label text-<?php echo $app['status'] == 'in_progress' ? 'yellow' : ($app['status'] == 'accepted' ? 'green' : ($app['status'] == 'rejected' ? 'red' : 'blue')); ?>">
+                                <?php echo ucfirst(str_replace('_', ' ', $app['status'])); ?>
                             </div>
-                            <div class="date"><?php echo htmlspecialchars(date('d M Y', strtotime($app['applied_at']))); ?></div>
+                            <div class="date"><?php echo date('d M Y', strtotime($app['applied_at'])); ?></div>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -619,15 +855,35 @@ try {
     </div>
 </div>
 
+<!-- ==========================================
+JAVASCRIPT
+========================================== -->
 <script>
+    function toggleMobileMenu() {
+        // Toggle sidebar visibility on small screens
+        const sb = document.querySelector('.sidebar');
+        if (!sb) return;
+        if (window.getComputedStyle(sb).display === 'none') {
+            sb.style.display = 'block';
+        } else {
+            sb.style.display = 'none';
+        }
+    }
+
     // Highlight active sidebar link
     (function() {
         const path = window.location.pathname.split('/').pop();
         document.querySelectorAll('.sidebar .menu a').forEach(a => {
             const href = a.getAttribute('href').split('/').pop();
             if (href === path) a.classList.add('active');
+            a.addEventListener('click', () => {
+                // allow normal navigation; also visually mark active immediately
+                document.querySelectorAll('.sidebar .menu a').forEach(x => x.classList.remove('active'));
+                a.classList.add('active');
+            });
         });
     })();
 </script>
+
 </body>
 </html>
