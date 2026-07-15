@@ -60,6 +60,9 @@ usort($conversations, function($a, $b) {
 
 // Determine selected contact
 $selectedContactId = isset($_GET['contact']) && is_numeric($_GET['contact']) ? intval($_GET['contact']) : null;
+if ($selectedContactId && !isset($contactMap[$selectedContactId])) {
+    $selectedContactId = null;
+}
 if (!$selectedContactId && !empty($conversations)) {
     $selectedContactId = $conversations[0]['id'];
 }
@@ -87,7 +90,23 @@ if ($selectedContactId) {
     }
 }
 
-$selectedContact = $selectedContactId ? ($contactMap[$selectedContactId] ?? null) : null;
+$selectedContact = null;
+if ($selectedContactId) {
+    if (isset($contactMap[$selectedContactId])) {
+        $selectedContact = $contactMap[$selectedContactId];
+    } else {
+        foreach ($conversations as $conversation) {
+            if ($conversation['id'] == $selectedContactId) {
+                $selectedContact = [
+                    'id' => $conversation['id'],
+                    'name' => $conversation['name'],
+                    'role' => $conversation['role'],
+                ];
+                break;
+            }
+        }
+    }
+}
 
 // Send message
 if (isset($_POST['send_message'])) {
@@ -124,9 +143,12 @@ $freelancers = $pdo->query("SELECT id, name FROM users WHERE role = 'freelancer'
         .conversations-header { padding: 22px 24px; border-bottom: 1px solid #eef2ff; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
         .conversations-header h2 { margin: 0; font-size: 18px; font-weight: 700; }
         .conversation-list { display: flex; flex-direction: column; overflow-y: auto; max-height: calc(100vh - 220px); }
-        .conversation-card { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; cursor: pointer; text-decoration: none; color: inherit; }
+        .conversation-card { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; cursor: pointer; text-decoration: none; color: inherit; transition: background 0.2s ease, border-color 0.2s ease; }
         .conversation-card:last-child { border-bottom: none; }
-        .conversation-card.active, .conversation-card:hover { background: #f8f4ff; }
+        .conversation-card:hover { background: #f8f4ff; }
+        .conversation-card.active { background: #f8f9ff; border-left: 2px solid #6366f1; padding-left: 16px; }
+        .conversation-card.active .conversation-name span { color: #0f172a; }
+        .conversation-card.active .conversation-snippet { color: #6b7280; }
         .conversation-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
         .conversation-content { flex: 1; min-width: 0; }
         .conversation-name { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-weight: 700; font-size: 14px; }

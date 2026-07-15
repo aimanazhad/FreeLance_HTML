@@ -60,6 +60,9 @@ usort($conversations, function($a, $b) {
 
 // Determine selected contact
 $selectedContactId = isset($_GET['contact']) && is_numeric($_GET['contact']) ? intval($_GET['contact']) : null;
+if ($selectedContactId && !isset($contactMap[$selectedContactId])) {
+    $selectedContactId = null;
+}
 if (!$selectedContactId && !empty($conversations)) {
     $selectedContactId = $conversations[0]['id'];
 }
@@ -74,7 +77,23 @@ if ($selectedContactId) {
     }
 }
 
-$selectedContact = $selectedContactId ? ($contactMap[$selectedContactId] ?? null) : null;
+$selectedContact = null;
+if ($selectedContactId) {
+    if (isset($contactMap[$selectedContactId])) {
+        $selectedContact = $contactMap[$selectedContactId];
+    } else {
+        foreach ($conversations as $conversation) {
+            if ($conversation['id'] == $selectedContactId) {
+                $selectedContact = [
+                    'id' => $conversation['id'],
+                    'name' => $conversation['name'],
+                    'role' => $conversation['role'],
+                ];
+                break;
+            }
+        }
+    }
+}
 
 // Send message
 if (isset($_POST['send_message'])) {

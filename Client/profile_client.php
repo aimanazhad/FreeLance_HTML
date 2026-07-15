@@ -9,21 +9,40 @@ $user = getUserById($_SESSION['user_id']);
 $error = '';
 $success = '';
 
+$avatarOptions = [
+    'Oliver' => 'Oliver',
+    'Liam' => 'Liam',
+    'Ethan' => 'Ethan',
+    'Noah' => 'Noah',
+    'Ava' => 'Ava',
+    'Mia' => 'Mia',
+    'Emma' => 'Emma',
+    'Sophia' => 'Sophia',
+];
+
+$selectedAvatarSeed = $user['avatar_seed'] ?? '';
+$currentAvatarSeed = !empty($selectedAvatarSeed) ? $selectedAvatarSeed : $user['name'];
+
 if (isset($_POST['update_profile'])) {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone'] ?? '');
     $bio = trim($_POST['bio'] ?? '');
+    $avatarSeed = trim($_POST['avatar_seed'] ?? $selectedAvatarSeed);
     
     if (empty($name) || empty($email)) {
         $error = '⚠️ Name and email are required.';
     } else {
-        $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, phone = ?, bio = ? WHERE id = ?");
-        if ($stmt->execute([$name, $email, $phone, $bio, $_SESSION['user_id']])) {
+        $avatarSeed = $avatarSeed !== '' ? $avatarSeed : null;
+        $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, phone = ?, bio = ?, avatar_seed = ? WHERE id = ?");
+        if ($stmt->execute([$name, $email, $phone, $bio, $avatarSeed, $_SESSION['user_id']])) {
             $_SESSION['name'] = $name;
             $_SESSION['email'] = $email;
+            $_SESSION['avatar_seed'] = $avatarSeed;
             $success = '✅ Profile updated successfully!';
             $user = getUserById($_SESSION['user_id']);
+            $selectedAvatarSeed = $user['avatar_seed'] ?? '';
+            $currentAvatarSeed = !empty($selectedAvatarSeed) ? $selectedAvatarSeed : $user['name'];
         }
     }
 }
@@ -90,6 +109,17 @@ if (isset($_POST['update_profile'])) {
         .btn-save { background: #6366f1; color: white; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; }
         .btn-save:hover { background: #4f46e5; }
         .avatar-container { display: flex; justify-content: center; }
+        .avatar-picker { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+        .avatar-display { position: relative; width: 120px; height: 120px; }
+        .avatar-display img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #eef2ff; }
+        .avatar-edit-icon { position: absolute; right: 0; bottom: 0; width: 36px; height: 36px; border-radius: 50%; background: #6366f1; display: flex; align-items: center; justify-content: center; color: #fff; border: 2px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.12); }
+        .avatar-selection { margin-bottom: 20px; }
+        .section-label { display: block; font-size: 13px; font-weight: 700; color: #1f2937; margin-bottom: 10px; }
+        .avatar-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+        .avatar-option { cursor: pointer; border: 2px solid transparent; border-radius: 16px; padding: 8px; transition: all 0.2s ease; }
+        .avatar-option.selected { border-color: #6366f1; background: #eef2ff; }
+        .avatar-option img { width: 100%; border-radius: 14px; }
+        .avatar-option input { display: none; }
         .freelancers-list { display: flex; flex-direction: column; gap: 14px; }
         .freelancer-item { display: flex; align-items: center; gap: 12px; }
         .freelancer-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
@@ -135,7 +165,7 @@ if (isset($_POST['update_profile'])) {
                 <div class="header-controls-right">
                     <button class="notification-btn"><i class="fa-regular fa-bell"></i></button>
                     <div class="profile-dropdown-trigger">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($_SESSION['name']); ?>" alt="User Avatar" class="profile-avatar">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($currentAvatarSeed); ?>" alt="User Avatar" class="profile-avatar">
                         <div class="user-info-text">
                             <span class="profile-name"><?php echo escape($_SESSION['name']); ?></span>
                             <span class="profile-role">Client</span>
@@ -155,7 +185,7 @@ if (isset($_POST['update_profile'])) {
                     <div class="profile-content-wrapper">
                         <div class="profile-left-section">
                             <div class="avatar-container">
-                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($user['name']); ?>" alt="Profile Avatar" class="profile-large-avatar">
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($currentAvatarSeed); ?>" alt="Profile Avatar" class="profile-large-avatar">
                             </div>
                             <div class="profile-info-section">
                                 <div class="info-item"><label>Full Name:</label><p><?php echo escape($user['name']); ?></p></div>
@@ -179,6 +209,53 @@ if (isset($_POST['update_profile'])) {
                 </div>
 
                 <div class="profile-additional-cards">
+                    <div class="settings-card">
+                        <?php if ($success): ?>
+                            <div class="alert alert-success"><?php echo escape($success); ?></div>
+                        <?php endif; ?>
+                        <?php if ($error): ?>
+                            <div class="alert alert-danger"><?php echo escape($error); ?></div>
+                        <?php endif; ?>
+                        <h2 class="settings-title"><i class="fa-solid fa-user-pen"></i> Edit Profile</h2>
+                        <form method="post">
+                            <div class="avatar-selection">
+                                <span class="section-label">Choose your profile avatar</span>
+                                <div class="avatar-picker">
+                                    <div class="avatar-display">
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($currentAvatarSeed); ?>" alt="Selected avatar">
+                                        <div class="avatar-edit-icon"><i class="fa-solid fa-pencil"></i></div>
+                                    </div>
+                                    <div class="avatar-options">
+                                        <?php foreach ($avatarOptions as $seed => $label): ?>
+                                            <label class="avatar-option <?php echo $selectedAvatarSeed === $seed ? 'selected' : ''; ?>">
+                                                <input type="radio" name="avatar_seed" value="<?php echo escape($seed); ?>" <?php echo $selectedAvatarSeed === $seed ? 'checked' : ''; ?>>
+                                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($seed); ?>" alt="<?php echo escape($label); ?> avatar">
+                                            </label>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" name="name" value="<?php echo escape($user['name']); ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" value="<?php echo escape($user['email']); ?>" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="text" id="phone" name="phone" value="<?php echo escape($user['phone'] ?? ''); ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="bio">Bio</label>
+                                <textarea id="bio" name="bio"><?php echo escape($user['bio'] ?? ''); ?></textarea>
+                            </div>
+                            <button type="submit" name="update_profile" class="btn-save">Save Changes</button>
+                        </form>
+                    </div>
+
                     <div class="settings-card">
                         <h2 class="settings-title"><i class="fa-solid fa-lock"></i> Account Security</h2>
                         <div class="settings-content">

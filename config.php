@@ -37,10 +37,15 @@ try {
         phone VARCHAR(30) DEFAULT NULL,
         bio TEXT DEFAULT NULL,
         skills TEXT DEFAULT NULL,
+        avatar_seed VARCHAR(150) DEFAULT NULL,
         notifications VARCHAR(20) DEFAULT 'on',
         status VARCHAR(20) DEFAULT 'active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
+    $avatarColumn = $pdo->query("SHOW COLUMNS FROM users LIKE 'avatar_seed'")->fetch();
+    if (!$avatarColumn) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN avatar_seed VARCHAR(150) DEFAULT NULL");
+    }
 
     // Create admins table (separate from users)
     $pdo->exec("CREATE TABLE IF NOT EXISTS admins (

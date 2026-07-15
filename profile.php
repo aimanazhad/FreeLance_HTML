@@ -9,22 +9,40 @@ $user = getUserById($_SESSION['user_id']);
 $error = '';
 $success = '';
 
+$avatarOptions = [
+    'Oliver' => 'Oliver',
+    'Liam' => 'Liam',
+    'Ethan' => 'Ethan',
+    'Noah' => 'Noah',
+    'Ava' => 'Ava',
+    'Mia' => 'Mia',
+    'Emma' => 'Emma',
+    'Sophia' => 'Sophia',
+];
+
+$selectedAvatarSeed = $user['avatar_seed'] ?? '';
+$currentAvatarSeed = !empty($selectedAvatarSeed) ? $selectedAvatarSeed : $user['name'];
+
 if (isset($_POST['update_profile'])) {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone'] ?? '');
     $bio = trim($_POST['bio'] ?? '');
     $skills = trim($_POST['skills'] ?? '');
+    $avatarSeed = trim($_POST['avatar_seed'] ?? $selectedAvatarSeed);
     
     if (empty($name) || empty($email)) {
         $error = '⚠️ Name and email are required.';
     } else {
-        $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, phone = ?, bio = ?, skills = ? WHERE id = ?");
-        if ($stmt->execute([$name, $email, $phone, $bio, $skills, $_SESSION['user_id']])) {
+        $avatarSeed = $avatarSeed !== '' ? $avatarSeed : null;
+        $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, phone = ?, bio = ?, skills = ?, avatar_seed = ? WHERE id = ?");
+        if ($stmt->execute([$name, $email, $phone, $bio, $skills, $avatarSeed, $_SESSION['user_id']])) {
             $_SESSION['name'] = $name;
             $_SESSION['email'] = $email;
             $success = '✅ Profile updated successfully!';
             $user = getUserById($_SESSION['user_id']);
+            $selectedAvatarSeed = $user['avatar_seed'] ?? '';
+            $currentAvatarSeed = !empty($selectedAvatarSeed) ? $selectedAvatarSeed : $user['name'];
         }
     }
 }
@@ -104,6 +122,17 @@ $totalEarnings = $pdo->query("SELECT SUM(amount) FROM payments WHERE freelancer_
         .panel .avatar-row img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #eef2ff; }
         .panel .avatar-row .info h4 { font-size: 16px; font-weight: 700; color: #0f172a; }
         .panel .avatar-row .info p { font-size: 14px; color: #94a3b8; }
+        .avatar-edit-row { display: flex; align-items: center; gap: 20px; margin-bottom: 22px; }
+        .avatar-display { position: relative; width: 88px; height: 88px; }
+        .avatar-display img { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; border: 3px solid #eef2ff; }
+        .avatar-edit-icon { position: absolute; right: -4px; bottom: -4px; width: 30px; height: 30px; border-radius: 50%; background: #6366f1; display: flex; align-items: center; justify-content: center; color: #fff; border: 2px solid #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.12); }
+        .avatar-selection { margin-bottom: 24px; }
+        .section-label { display: block; font-size: 13px; font-weight: 700; color: #1f2937; margin-bottom: 10px; }
+        .avatar-options { display: grid; grid-template-columns: repeat(4, auto); gap: 10px; justify-content: start; }
+        .avatar-option { cursor: pointer; border: 2px solid transparent; border-radius: 12px; padding: 4px; transition: all 0.2s ease; background: #f9fafb; width: 112px; }
+        .avatar-option.selected { border-color: #6366f1; background: #eef2f5; }
+        .avatar-option img { width: 100%; border-radius: 12px; display: block; }
+        .avatar-option input { display: none; }
 
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .form-group {
@@ -198,7 +227,10 @@ $totalEarnings = $pdo->query("SELECT SUM(amount) FROM payments WHERE freelancer_
 
         <div class="panel">
             <div class="avatar-row">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($user['name']); ?>" alt="">
+                <div class="avatar-display">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($currentAvatarSeed); ?>" alt="Selected avatar">
+                    <div class="avatar-edit-icon"><i class="fa-solid fa-pencil"></i></div>
+                </div>
                 <div class="info">
                     <h4><?php echo escape($user['name']); ?></h4>
                     <p><?php echo escape($user['email']); ?></p>
@@ -206,6 +238,18 @@ $totalEarnings = $pdo->query("SELECT SUM(amount) FROM payments WHERE freelancer_
             </div>
 
             <form method="POST">
+                <div class="avatar-selection">
+                    <span class="section-label">Choose your profile avatar</span>
+                    <div class="avatar-options">
+                        <?php foreach ($avatarOptions as $seed => $label): ?>
+                            <label class="avatar-option <?php echo $selectedAvatarSeed === $seed ? 'selected' : ''; ?>">
+                                <input type="radio" name="avatar_seed" value="<?php echo escape($seed); ?>" <?php echo $selectedAvatarSeed === $seed ? 'checked' : ''; ?>>
+                                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=<?php echo urlencode($seed); ?>" alt="<?php echo escape($label); ?> avatar">
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Full Name</label>
