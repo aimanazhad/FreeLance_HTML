@@ -3,10 +3,10 @@
 // DATABASE CONFIGURATION
 // ============================================
 
-$host = 'localhost';
-$dbname = 'freelancer_db';
-$username = 'root';
-$password = '';
+$host = 'sql302.infinityfree.com';
+$dbname = 'if0_42421301_freelancer';
+$username = 'if0_42421301';
+$password = 'Anis160203';
 
 // ============================================
 // PDO CONNECTION WITH ERROR HANDLING
